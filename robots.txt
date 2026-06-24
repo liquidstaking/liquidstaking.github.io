@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://liquidstaking.github.io/sitemap.xml
