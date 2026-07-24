@@ -1,0 +1,19 @@
+{
+  "name": "Liquid Staking",
+  "short_name": "Liquid Staking",
+  "description": "Liquid staking explained by practitioners: how LSTs work, how rewards accrue, your protocol options, custody tradeoffs, slashing and depeg risks, and how to exit.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "lang": "en",
+  "background_color": "#f5f6f8",
+  "theme_color": "#f5f6f8",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

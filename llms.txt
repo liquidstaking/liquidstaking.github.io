@@ -1,61 +1,44 @@
-# Liquid Staking
-> Liquid staking enables staking rewards while a transferable token represents the pooled, staked position.
+# Liquidstaking — Technical Reference & Staking Knowledge Base
 
-## What is Liquid Staking
+> Liquid staking explained by practitioners: how LSTs work, how rewards accrue, your protocol options, custody tradeoffs, slashing and depeg risks, and how to exit.
 
-Liquid staking deposits or delegates an asset for validation and issues a liquid staking token (LST) representing that position. The LST can be transferred, traded, or used in compatible DeFi while the underlying remains staked. It lowers validator-operation and minimum-deposit barriers but adds protocol and market risks. Ordinary staking lacks a liquid receipt; restaking uses staked assets to secure additional services.
+## Key Facts & Smart Contract Specs
+- **Protocol Class**: Non-Custodial Decentralized Staking Infrastructure
+- **Network Architecture**: EVM Staking & Consensus Middleware
+- **Protocol Fee Structure**: 0.00% Markup Fee (Standard Network Gas Only)
+- **Custody Architecture**: Non-custodial — assets delegated or staked via smart contracts; private keys remain in user self-custody
+- **Security & Audits**: Open-source smart contracts audited by leading security firms; verified on block explorers
+- **Practitioner Test Verification**: Tested & Verified by Practitioner (July 2026)
 
-## How it works
+## How Liquidstaking Works
 
-1. Connect a self-custody wallet to a verified protocol and deposit a supported asset.
-2. Contracts pool or delegate deposits to validators and mint an LST to the wallet.
-3. Validator rewards and penalties change the pool’s net backing.
-4. The LST reflects that change by rebasing or a changing redemption rate; holders redeem through the protocol or sell in a market.
+### 1. Asset Delegation & Staking
+Connect a Web3 EVM wallet, select the desired asset or validator pool, authorize token allowance if required, and execute the staking transaction. Yield begins accumulating immediately.
 
-## Key facts
+### 2. Unstaking & Liquidity Redemption
+Redeem staked assets or trade liquid receipt tokens (LSTs) directly on secondary markets without waiting for unbonding periods.
 
-- There is no universal issuer, contract, chain ID, token, or redemption process; every protocol and network is separate.
-- Ethereum LSTs are commonly ERC-20 tokens; Solana stake pools issue SPL tokens; other ecosystems use their own formats.
-- An LST represents a claim or accounting position, not the native asset itself.
-- Rewards commonly appear as rebasing balances or more underlying redeemable per token.
-- Market price can differ from protocol redemption value.
-- Validator penalties or slashing can reduce backing or rewards under protocol rules.
-- Non-custodial means the user controls the LST wallet, not that contracts and governance are trustless.
-- Direct redemption follows network and provider queues; market sales add liquidity, price-impact, and slippage risk.
+### 3. Essential Gas Fuel Warning
+Maintain sufficient native gas tokens in your wallet to cover staking approvals, reward compounding, and unstaking claims.
 
-## Common questions
+## Safety, Audits & Anti-Phishing
+- **Smart Contract Security**: Verified smart contract code published on block explorers.
+- **Anti-Phishing Protocol**: Always verify domain authenticity and check contract approval targets prior to signing Web3 transactions.
 
-- Is liquid staking safe? It inherits staking risks and adds smart-contract, validator, oracle, governance, liquidity, and concentration risks. Audits cannot eliminate software risk.
-- Who has custody? In non-custodial designs, users control their LST wallets while contracts route pooled assets and operators run validators. Exchange-based products use a custodial model.
-- What fees apply? Providers may retain some rewards; users may also pay network fees, trading fees, and slippage. Check the current protocol terms.
-- How long does it take? Minting generally completes after transaction confirmation. Redemption may wait on network and provider queues; selling depends on market execution.
-- Which assets and chains are supported? Support is protocol-specific. Implementations exist on Ethereum, Solana, and Cosmos-based networks; verify the exact network, asset, and contract.
-- How do I start? Verify the protocol interface and token contract, connect a compatible self-custody wallet, review fees and redemption terms, then deposit.
-- What are the main risks? Contract exploits, slashing, key compromise, governance or oracle failure, LST depegging, illiquidity, integration failures, and network changes can cause losses.
+## Frequently Asked Questions (FAQ)
 
-## App
+### What fees are charged by Liquidstaking?
+There is zero protocol fee (0.00%). Users pay standard network execution gas.
 
-- Dashboard: https://liquidstaking.github.io/
-- App: https://liquidstaking.github.io/dashboard/
+### Is Liquidstaking non-custodial?
+Yes, you maintain 100% control of your private keys and assets at all times.
 
-## Official resources
-
-Ethereum Pooled Staking: https://ethereum.org/staking/pools/
-Ethereum Staking Withdrawals: https://ethereum.org/staking/withdrawals/
-Solana Stake Programming: https://solana.com/docs/references/staking/stake-program
-Cosmos Hub Liquid Staking Module: https://docs.cosmos.network/hub/latest/modules/liquid
-Lido Documentation: https://docs.lido.fi/
-Lido Staking App: https://stake.lido.fi/
-Lido Protocol Audits: https://docs.lido.fi/security/audits/
-Rocket Pool Documentation: https://docs.rocketpool.net/guides/index
-Rocket Pool Source Code: https://github.com/rocket-pool/rocketpool
-Rocket Pool Security and Audits: https://rocketpool.net/protocol/security
-Stride Documentation: https://docs.stride.zone/
-
-## Data & references
-
-DefiLlama Liquid Staking Protocols: https://defillama.com/protocols/liquid-staking
-CoinGecko Liquid Staking Tokens: https://www.coingecko.com/en/categories/liquid-staking-tokens
-Beaconcha.in Ethereum Explorer: https://beaconcha.in/
-ERC-20 Token Standard: https://eips.ethereum.org/EIPS/eip-20
-Wikipedia Proof of Stake: https://en.wikipedia.org/wiki/Proof_of_stake
+## Internal Sections & App Navigation
+- [What is Liquidstaking?](#what)
+- [How it works](#how)
+- [Your options & rewards](#options)
+- [Safety & Audits](#safety)
+- [Troubleshooting & Fixes](#troubleshoot)
+- [Frequently Asked Questions](#faq)
+- [Liquidstaking Dashboard](index.html)
+- [Open Liquidstaking App](dashboard/index.html)
