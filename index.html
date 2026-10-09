@@ -1,639 +1,297 @@
-<!DOCTYPE html>
-
+﻿<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Liquid Staking — Dashboard</title>
-<meta content="Liquid staking explained by practitioners: how LSTs work, how rewards accrue, your protocol options, custody tradeoffs, slashing and depeg risks, and how to exit." name="description"/>
-<meta content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" name="robots"/>
-<meta content="#f5f6f8" name="theme-color"/>
-<link href="https://liquidstaking.github.io/" rel="canonical"/>
-<link href="eth.png" rel="icon" type="image/png"/>
-<link href="eth.png" rel="apple-touch-icon"/>
-<link href="manifest.webmanifest" rel="manifest"/>
-<link href="og-cover.png" rel="image_src"/>
-<link crossorigin="" href="https://api.coingecko.com" rel="preconnect"/>
-<style>
-/* Liquid Staking — independent single-page hub. */
-:root {
-  color-scheme: light;
-  --bg: #f5f6f8; --surface: #ffffff; --panel: #ffffff; --raised: #f1f3f6;
-  --line: rgba(17, 24, 39, 0.10); --line-2: rgba(17, 24, 39, 0.16);
-  --ink: #0e1016; --text: #464d59; --muted: #6a7280; --faint: #98a0ad;
-  --accent: #3d5de6; --accent-2: #2c45c8; --accent-soft: rgba(61, 93, 230, 0.10); --accent-glow: rgba(61, 93, 230, 0.22);
-  --cyan: #0e93a8; --cta: #3d5de6; --cta-ink: #ffffff;
-  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px;
-  --mono: ui-monospace, "SF Mono", SFMono-Regular, "Roboto Mono", Menlo, Consolas, monospace;
-  --font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --ease: cubic-bezier(0.22, 0.7, 0.24, 1);
-}
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-body {
-  margin: 0; min-width: 320px;
-  color: var(--text); background: var(--bg);
-  font-family: var(--font); font-size: 15px; line-height: 1.55;
-  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
-}
-a { color: inherit; text-decoration: none; }
-a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; border-radius: 8px; }
-img { display: block; max-width: 100%; }
-.skip { position: absolute; left: -999px; }
-.skip:focus { left: 12px; top: 12px; z-index: 99; padding: 8px 14px; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 750; }
-
-.shell { display: flex; min-height: 100dvh; }
-
-/* ───────── sidebar (off-canvas drawer) ───────── */
-.sidebar {
-  position: fixed; top: 0; left: 0; z-index: 70;
-  width: min(288px, 86vw); height: 100vh; height: 100dvh; overflow-y: auto;
-  display: flex; flex-direction: column; padding: 16px 12px 14px;
-  background: var(--surface); border-right: 1px solid var(--line);
-  transform: translateX(-100%); transition: transform 0.24s var(--ease);
-  box-shadow: 24px 0 70px rgba(17, 24, 39, 0.15);
-}
-.sidebar.is-open { transform: none; }
-.scrim { position: fixed; inset: 0; z-index: 65; background: rgba(17, 24, 39, 0.30); opacity: 0; pointer-events: none; transition: opacity 0.24s var(--ease); }
-.scrim.is-open { opacity: 1; pointer-events: auto; }
-html:not(.js) .sidebar { position: static; transform: none; width: 262px; height: auto; box-shadow: none; }
-html:not(.js) .scrim, html:not(.js) .nav-toggle { display: none; }
-.side-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 2px 8px 6px; }
-.brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
-.brand-logo { width: 32px; height: 32px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 9px; background: var(--raised); box-shadow: inset 0 0 0 1px var(--line-2); }
-.brand-logo img { width: 20px; height: 20px; border-radius: 6px; }
-.brand-name { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink); line-height: 1; }
-.nav-label { margin: 14px 12px 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--faint); }
-.nav-item { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 9px; color: var(--text); font-size: 14px; font-weight: 600; transition: color 150ms var(--ease), background-color 150ms var(--ease); }
-.ni-ico { width: 18px; height: 18px; flex: 0 0 auto; color: var(--muted); }
-.ni-ext { margin-left: auto; color: var(--faint); font-size: 12px; }
-.nav-item:hover { color: var(--ink); background: rgba(17, 24, 39, 0.04); }
-.nav-item:hover .ni-ico { color: var(--text); }
-.nav-item.is-active { color: var(--accent-2); background: transparent; }
-.nav-item.is-active .ni-ico { color: var(--accent-2); }
-.nav-group { border-radius: 9px; }
-.nav-group summary { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 9px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; list-style: none; transition: color 150ms var(--ease), background-color 150ms var(--ease); }
-.nav-group summary::-webkit-details-marker { display: none; }
-.nav-group summary .ni-ico { color: var(--muted); }
-.nav-group summary .chev { width: 15px; height: 15px; margin-left: auto; color: var(--faint); transition: transform 200ms var(--ease); }
-.nav-group summary:hover { color: var(--ink); background: rgba(17, 24, 39, 0.04); }
-.nav-group[open] summary { color: var(--ink); }
-.nav-group[open] summary .ni-ico { color: var(--text); }
-.nav-group[open] summary .chev { transform: rotate(180deg); }
-@media (prefers-reduced-motion: reduce) { .nav-group summary .chev { transition: none; } }
-.nav-sub { display: flex; flex-direction: column; gap: 1px; padding: 2px 0 8px 42px; }
-.nav-sub a { display: flex; align-items: baseline; gap: 7px; padding: 6px 10px; border-radius: 8px; color: var(--muted); font-size: 12.5px; font-weight: 550; transition: color 150ms var(--ease), background-color 150ms var(--ease); }
-.nav-sub a small { color: var(--faint); font-size: 10.5px; font-weight: 500; }
-.nav-sub a:hover { color: var(--accent-2); background: rgba(17, 24, 39, 0.04); }
-.nav-sub a:hover small { color: var(--muted); }
-.sidebar-foot { margin-top: auto; padding-top: 13px; border-top: 1px solid var(--line); }
-.disclose { margin: 8px 10px 0; font-size: 11px; line-height: 1.5; color: var(--muted); }
-.disclose strong { color: var(--text); font-weight: 700; }
-.fine { margin: 6px 10px 0; font-size: 10.5px; line-height: 1.45; color: var(--faint); }
-.nav-toggle { display: inline-flex; width: 38px; height: 38px; flex: 0 0 auto; position: relative; padding: 0; border: 1px solid var(--line-2); border-radius: 10px; background: var(--raised); color: var(--ink); cursor: pointer; }
-.nav-toggle .bar { position: absolute; left: 10px; right: 10px; height: 2px; border-radius: 2px; background: currentColor; transition: transform 0.22s var(--ease), opacity 0.18s var(--ease); }
-.nav-toggle .bar:nth-child(1) { top: 13px; } .nav-toggle .bar:nth-child(2) { top: 18px; } .nav-toggle .bar:nth-child(3) { top: 23px; }
-.sidebar.is-open .nav-toggle .bar:nth-child(1) { transform: translateY(5px) rotate(45deg); }
-.sidebar.is-open .nav-toggle .bar:nth-child(2) { opacity: 0; }
-.sidebar.is-open .nav-toggle .bar:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
-
-/* persistent header: hamburger + logo + H1 */
-.topbar-left { display: flex; align-items: center; gap: 12px 14px; min-width: 0; flex-wrap: wrap; }
-.menu-btn { display: inline-flex; flex-direction: column; justify-content: center; gap: 4px; width: 40px; height: 38px; flex: 0 0 auto; padding: 0 9px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--raised); color: var(--ink); cursor: pointer; }
-.menu-btn .bar { display: block; height: 2px; width: 100%; border-radius: 2px; background: currentColor; transition: transform 0.22s var(--ease), opacity 0.18s var(--ease); }
-.menu-btn:hover { border-color: var(--accent); color: var(--accent-2); }
-.shell.nav-open .menu-btn .bar:nth-child(1) { transform: translateY(6px) rotate(45deg); }
-.shell.nav-open .menu-btn .bar:nth-child(2) { opacity: 0; }
-.shell.nav-open .menu-btn .bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
-.topbar-logo { width: 32px; height: 32px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 9px; background: var(--raised); box-shadow: inset 0 0 0 1px var(--line-2); }
-.topbar-logo img { width: 20px; height: 20px; border-radius: 6px; }
-h1.wordmark { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink); line-height: 1; white-space: nowrap; }
-html:not(.js) .menu-btn { display: none; }
-
-/* ───────── main / topbar ───────── */
-.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.topbar { position: relative; z-index: 40; flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; padding: 14px 26px; border-bottom: 0; background: transparent; }
-.topbar-right { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; }
-.mode-switch { display: inline-flex; align-items: center; gap: 10px; }
-.ms-label { font-size: 13.5px; font-weight: 700; color: var(--muted); transition: color 150ms var(--ease); }
-.ms-label.is-on { color: var(--ink); }
-.ms-track { position: relative; width: 42px; height: 24px; flex: 0 0 auto; padding: 0; border: 1px solid var(--line-2); border-radius: 999px; background: var(--raised); cursor: pointer; transition: background-color 180ms var(--ease); }
-.ms-knob { position: absolute; top: 50%; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); transform: translateY(-50%); transition: left 200ms var(--ease); }
-.ms-track[aria-checked="true"] { background: var(--accent-soft); border-color: rgba(61, 93, 230, 0.4); }
-.ms-track[aria-checked="true"] .ms-knob { left: 23px; background: var(--accent-2); }
-.ticker { display: flex; align-items: center; flex-wrap: wrap; gap: 3px 16px; min-width: 0; }
-.tick { display: inline-flex; align-items: baseline; gap: 6px; color: var(--faint); font-size: 11px; font-weight: 550; letter-spacing: 0.01em; transition: color 150ms var(--ease); }
-.tick b { color: var(--muted); font-family: var(--mono); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.tick .ext { color: var(--faint); font-size: 9.5px; transition: color 150ms var(--ease); }
-.tick:hover { color: var(--muted); } .tick:hover b, .tick:hover .ext { color: var(--accent-2); }
-.btn-open { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border: 1px solid var(--line-2); border-radius: 10px; color: var(--ink); background: rgba(17, 24, 39, 0.04); font-size: 12.5px; font-weight: 700; white-space: nowrap; transition: border-color 150ms var(--ease), background-color 150ms var(--ease); }
-.btn-open:hover { border-color: var(--accent); color: var(--accent-2); }
-
-/* ───────── first screen: hero + swap card ───────── */
-.stage { position: relative; min-height: calc(100dvh - 56px); width: min(560px, 100%); margin-inline: auto; padding: clamp(16px, 3vh, 40px) 24px clamp(52px, 9vh, 96px); display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: clamp(14px, 3vh, 26px); }
-.hero { text-align: center; margin: 0; }
-.hero-h2 { margin: 0; font-size: clamp(1.5rem, 3.6vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); }
-@supports ((-webkit-background-clip: text) or (background-clip: text)) { .hero-h2 { background: linear-gradient(180deg, #0e1016, #3a4c85); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; } }
-.hero-sub { margin: 10px auto 0; max-width: 48ch; font-size: 13.5px; line-height: 1.55; color: var(--text); }
-.hero-sub strong { color: var(--ink); font-weight: 700; }
-.swap-card { border: 1px solid var(--line-2); border-radius: var(--r-xl); background: var(--panel); padding: 16px; }
-.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 0 2px; }
-.card-title { margin: 0; font-size: 11.5px; font-weight: 750; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
-.preview-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--accent-2); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-.preview-tag > span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.leg { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 15px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--raised); }
-.asset { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; border: 1px solid var(--line-2); border-radius: 999px; background: rgba(17, 24, 39, 0.04); color: var(--ink); font-size: 14px; font-weight: 700; }
-.asset .tok { width: 26px; height: 26px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #fff; }
-.asset .tok img { width: 26px; height: 26px; }
-.asset .chev-sm { width: 15px; height: 15px; color: var(--muted); }
-.leg-amt { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; min-width: 0; }
-.leg-amt .amount { font-family: var(--mono); font-size: 1.7rem; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1; }
-.leg-amt .leg-sub { font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); }
-.swap-arrow { position: relative; z-index: 1; display: grid; place-items: center; width: 40px; height: 40px; margin: -12px auto; border: 3px solid var(--panel); border-radius: 12px; background: var(--raised); color: var(--accent-2); cursor: pointer; box-shadow: 0 0 0 1px var(--line-2); transition: transform 220ms var(--ease), color 150ms var(--ease); }
-.swap-arrow svg { width: 17px; height: 17px; }
-.swap-arrow:hover { color: #fff; transform: rotate(180deg); }
-.route-panel { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding: 13px 15px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--raised); }
-.route-info b { display: block; color: var(--ink); font-size: 13.5px; font-weight: 700; letter-spacing: 0.01em; }
-.route-info span { display: block; margin-top: 2px; color: var(--faint); font-size: 11.5px; }
-.route-tok { display: inline-flex; align-items: center; gap: 7px; color: var(--text); font-size: 13px; font-weight: 650; white-space: nowrap; }
-.route-tok .tok { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; background: #fff; display: grid; place-items: center; }
-.route-tok .tok img { width: 20px; height: 20px; }
-.route-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 4px 2px; border-top: 1px solid var(--line); margin-top: 10px; }
-.route-row span { font-size: 10.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); }
-.route-row b { color: var(--text); font-size: 12.5px; font-weight: 650; font-variant-numeric: tabular-nums; }
-.swap-cta { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; padding: 15px; border-radius: var(--r-md); color: var(--cta-ink); background: var(--cta); font-size: 15px; font-weight: 750; letter-spacing: 0.01em; transition: filter 150ms var(--ease), transform 150ms var(--ease); }
-.swap-cta:hover { filter: brightness(1.04); transform: translateY(-1px); }
-/* scroll cue at the foot of the first screen */
-.scroll-cue { position: absolute; left: 0; right: 0; bottom: 10px; display: flex; justify-content: center; }
-.scroll-cue a { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; color: var(--faint); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
-.scroll-cue a:hover { color: var(--accent-2); }
-.scroll-cue svg { width: 16px; height: 16px; animation: cue 1.8s var(--ease) infinite; }
-@keyframes cue { 0%,100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
-@media (prefers-reduced-motion: reduce) { .scroll-cue svg { animation: none; } }
-
-/* ───────── merged content (all in initial HTML; revealed on scroll) ───────── */
-.content { width: min(760px, 100%); margin: 0 auto; padding: clamp(56px, 12vh, 140px) 24px 88px; }
-.content .lead-in { padding: clamp(4px, 1vh, 12px) 0 clamp(10px, 2.5vh, 22px); }
-.content .lead-in > p { margin: 0 0 16px; font-size: 15px; line-height: 1.66; color: var(--text); }
-.content .lead-in > p strong { color: var(--ink); font-weight: 700; }
-/* premium feature card (modern-site feel) */
-.content .lead-in .feat{position:relative;width:min(1120px,calc(100vw - 44px));margin-left:50%;transform:translateX(-50%);display:grid;grid-template-columns:1.08fr .92fr;align-items:stretch;background:linear-gradient(165deg,#141824,#0b0e15);border:1px solid rgba(255,255,255,.09);border-radius:28px;overflow:hidden;box-shadow:0 52px 120px -55px rgba(0,0,0,.82)}
-.feat-l{padding:clamp(32px,4vw,64px);display:flex;flex-direction:column;justify-content:center}
-.feat-l h2{margin:0;font-size:clamp(2.2rem,4.6vw,3.2rem);line-height:1.03;font-weight:800;letter-spacing:-.03em;color:#fff}
-.feat-lead{margin:20px 0 0;font-size:17px;line-height:1.6;color:rgba(255,255,255,.9);max-width:48ch}
-.content .lead-in .feat-lead a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.55);text-underline-offset:3px}
-.content .lead-in .feat-lead a:hover{text-decoration-color:#fff}
-.feat-cta{margin:32px 0 0}
-.content .lead-in .feat-btn{display:inline-flex;align-items:center;gap:10px;padding:17px 38px;border-radius:999px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 50%,#7c4dff));color:#fff;font-weight:750;font-size:16.5px;text-decoration:none;box-shadow:0 20px 44px -12px var(--accent-glow);transition:transform .16s var(--ease),box-shadow .16s var(--ease)}
-.content .lead-in .feat-btn:hover{transform:translateY(-2px);box-shadow:0 26px 56px -14px var(--accent-glow)}
-.feat-btn .arr{transition:transform .18s var(--ease)}
-.content .lead-in .feat-btn:hover .arr{transform:translateX(3px)}
-.feat-more{margin:18px 0 0}
-.feat-readmore{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:rgba(255,255,255,.7);transition:color .15s var(--ease)}
-.feat-readmore::-webkit-details-marker{display:none}
-.feat-readmore:hover{color:#fff}
-.feat-readmore .chev{width:15px;height:15px;transition:transform .2s var(--ease)}
-.feat-more[open] .feat-readmore .chev{transform:rotate(180deg)}
-.feat-detail{margin:20px 0 0;font-size:14.5px;line-height:1.72;color:rgba(255,255,255,.82)}
-.content .lead-in .feat-detail a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.55);text-underline-offset:3px}
-.feat-more:not([open]) .feat-detail{display:none}
-.content .lead-in .feat-lead{color:rgba(255,255,255,.9)}
-.content .lead-in .feat-detail,.content .lead-in .feat-detail p{color:rgba(255,255,255,.82)}
-.feat-facts{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;margin:18px 0 2px}
-.feat-fact{padding:10px 0;border-top:1px solid rgba(255,255,255,.1)}
-.feat-fact .fl{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.5);margin:0 0 3px}
-.feat-fact .fv{display:block;font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.88)}
-.feat-r{position:relative;overflow:hidden;min-height:clamp(300px,32vw,440px);background:radial-gradient(120% 105% at 70% 22%,color-mix(in srgb,var(--accent) 52%,#1a1030),#0a0d14 70%)}
-.feat-r::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:36px 36px;-webkit-mask:radial-gradient(70% 72% at 64% 36%,#000,transparent 76%);mask:radial-gradient(70% 72% at 64% 36%,#000,transparent 76%)}
-.feat-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;width:clamp(122px,16vw,166px);height:clamp(122px,16vw,166px);border-radius:34px;display:grid;place-items:center;background:linear-gradient(160deg,rgba(255,255,255,.18),rgba(255,255,255,.02));box-shadow:0 38px 84px -22px var(--accent-glow),inset 0 0 0 1px rgba(255,255,255,.18)}
-.feat-badge img{width:52%;height:52%;object-fit:contain}
-@media (max-width:860px){
-  .content .lead-in .feat{width:calc(100vw - 28px);grid-template-columns:1fr}
-  .feat-l{padding:30px 22px 32px}
-  .feat-r{min-height:200px}
-  .feat-facts{grid-template-columns:1fr}
-}
-
-.tbl.spec table { min-width: 0; }
-.tbl.spec td:first-child { color: var(--muted); font-weight: 600; white-space: nowrap; width: 1%; }
-.content .sec { border-top: 1px solid var(--line); scroll-margin-top: 66px; }
-.content .sec:first-child { border-top: 0; }
-.content .sec > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: clamp(20px, 4vh, 32px) 0; }
-.content .sec > summary::-webkit-details-marker { display: none; }
-.content .sec > summary h2 { margin: 0; font-size: clamp(1.25rem, 2.8vw, 1.6rem); font-weight: 800; letter-spacing: -0.02em; color: var(--ink); transition: color 150ms var(--ease); }
-.content .sec > summary::after { content: "+"; flex: 0 0 auto; color: var(--accent); font-weight: 700; font-size: 1.5rem; line-height: 1; }
-.content .sec[open] > summary::after { content: "\2212"; }
-.content .sec > summary:hover h2 { color: var(--accent-2); }
-.content .sec-body { padding: 0 0 clamp(22px, 4vh, 34px); }
-.content .sec[open] .sec-body { animation: secdrop 0.22s var(--ease); }
-@keyframes secdrop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .content .sec[open] .sec-body { animation: none; } }
-.content p { margin: 0 0 13px; color: var(--text); }
-.content p strong, .content li strong { color: var(--ink); font-weight: 700; }
-.content ul, .content ol { margin: 0 0 14px; padding-left: 20px; }
-.content li { margin-bottom: 8px; color: var(--text); }
-.content li::marker { color: var(--accent); }
-/* inline source links — blend with the copy, brighten only on hover */
-.content .sec-body a, .content .qa .a a, .content .lead-in a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: rgba(17, 24, 39, 0.26); transition: color 150ms var(--ease), text-decoration-color 150ms var(--ease); }
-.content .sec-body a:hover, .content .qa .a a:hover, .content .lead-in a:hover { color: var(--accent-2); text-decoration-color: var(--accent-2); }
-.content .sec-body a.addr { text-decoration-color: rgba(134, 160, 255, 0.32); }
-.cite { margin: 4px 0 0; font-size: 12px; color: var(--faint); }
-.cite a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
-.cite a:hover { color: var(--accent-2); }
-.tbl { width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); margin: 4px 0 14px; background: var(--panel); }
-.tbl table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 460px; }
-.tbl th { text-align: left; font-weight: 700; color: var(--accent-2); background: rgba(17, 24, 39, 0.04); padding: 10px 13px; border-bottom: 1px solid var(--line-2); font-size: 11.5px; letter-spacing: 0.02em; }
-.tbl td { padding: 10px 13px; border-bottom: 1px solid var(--line); color: var(--text); vertical-align: top; }
-.tbl tr:last-child td { border-bottom: 0; }
-.tbl td:first-child { color: var(--ink); font-weight: 600; }
-.qa { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); margin: 0 0 10px; overflow: hidden; }
-.qa summary { padding: 15px 18px; color: var(--ink); font-weight: 650; cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 12px; font-size: 14.5px; }
-.qa summary::-webkit-details-marker { display: none; }
-.qa summary::after { content: "+"; color: var(--accent); font-weight: 700; font-size: 1.15rem; line-height: 1; }
-.qa[open] summary::after { content: "−"; }
-.qa[open] { border-color: var(--line-2); }
-.qa .a { padding: 0 18px 15px; color: var(--text); font-size: 13.5px; }
-.qa .a p { margin: 0 0 8px; }
-.addr { font-family: var(--mono); font-size: 12px; color: var(--accent-2); word-break: break-all; }
-.disclosure-box { margin: 24px 0 0; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); font-size: 12.5px; line-height: 1.6; color: var(--muted); }
-.disclosure-box strong { color: var(--text); }
-/* scroll-reveal — content is always present; JS only animates it in */
-html.js .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
-html.js .reveal.in { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { html.js .reveal { opacity: 1; transform: none; transition: none; } }
-
-/* ───────── responsive ───────── */
-@media (max-width: 560px) {
-  .topbar { padding: 10px 16px; }
-  .stage { padding: 16px 16px 40px; }
-  .content { padding: clamp(40px, 9vh, 90px) 16px 72px; }
-  .ticker { display: none; }
-  .leg-amt .amount { font-size: 1.5rem; }
-}
-@media (max-height: 720px) and (min-width: 561px) {
-  .hero-h2 { font-size: clamp(1.35rem, 3.2vw, 1.9rem); }
-  .hero-sub { font-size: 13px; margin-top: 8px; }
-  .swap-card { padding: 13px; }
-  .leg { padding: 12px 14px; }
-  .leg-amt .amount { font-size: 1.45rem; }
-  .route-panel { margin-top: 9px; padding: 11px 14px; }
-  .swap-cta { margin-top: 12px; padding: 13px; }
-}
-.hero.stake-hero { text-align: center; max-width: 720px; margin: 0 auto; }
-.kicker { margin: 0 0 14px; text-transform: uppercase; letter-spacing: 0.2em; font-size: 11px; font-weight: 800; color: var(--accent); }
-.hero.stake-hero .hero-h2 { font-size: clamp(2rem, 5.2vw, 3.1rem); line-height: 1.08; }
-.hero.stake-hero .hero-sub { font-size: 15px; max-width: 54ch; margin-top: 14px; }
-.stake-gateway { margin: 36px auto 0; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-.emblem { width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(120% 120% at 30% 25%, #ffffff, #e8ecfb); box-shadow: 0 24px 60px -18px rgba(61,93,230,0.55), inset 0 0 0 1px rgba(61,93,230,0.12); position: relative; }
-.emblem::after { content: ""; position: absolute; inset: -16px; border-radius: 50%; background: radial-gradient(circle, rgba(61,93,230,0.20), transparent 70%); z-index: -1; }
-.emblem img { width: 52px; height: 52px; }
-.gw-facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; }
-.gw-chip { border: 1px solid var(--line-2); border-radius: 999px; padding: 7px 15px; font-size: 12.5px; font-weight: 600; color: var(--text); background: var(--panel); }
-.stake-cta { display: inline-flex; align-items: center; gap: 10px; padding: 15px 32px; border-radius: 14px; background: var(--cta); color: var(--cta-ink); font-weight: 800; font-size: 16px; text-decoration: none; box-shadow: 0 16px 38px -10px rgba(61,93,230,0.6); transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease); }
-.stake-cta:hover { transform: translateY(-2px); box-shadow: 0 22px 48px -12px rgba(61,93,230,0.72); }
-.stake-cta .cta-ico { width: 17px; height: 17px; flex: 0 0 auto; }
-.stake-cta .cta-go { transition: transform 0.18s var(--ease); }
-.stake-cta:hover .cta-go { transform: translateX(4px); }
-.cta-note { margin: 0; font-size: 11.5px; color: var(--faint); letter-spacing: 0.02em; }
-.stage { position: relative; }
-.stage::before { content: ""; position: absolute; top: -6%; left: 50%; transform: translateX(-50%); width: min(780px, 94vw); height: 440px; background: radial-gradient(60% 60% at 50% 38%, rgba(61,93,230,0.11), transparent 72%); z-index: 0; pointer-events: none; }
-.hero, .stake-gateway, .scroll-cue { position: relative; z-index: 1; }
-.field-notes { margin: clamp(28px,5vh,52px) 0 0; padding: 20px 22px; border: 1px solid var(--line-2); border-left: 3px solid var(--accent); border-radius: var(--r-md); background: var(--panel); }
-.field-notes h2 { margin: 0 0 12px; font-size: clamp(1.15rem,2.6vw,1.4rem); font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
-.field-notes .fn-body { color: var(--text); font-size: 14px; line-height: 1.66; }
-.field-notes .fn-body strong { color: var(--ink); font-weight: 700; }
-.field-notes .fn-body ul { margin: 8px 0 0; padding-left: 20px; }
-.field-notes .fn-body li { margin-bottom: 6px; }
-.content .sec { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); margin: 0 0 14px; scroll-margin-top: 80px; box-shadow: 0 1px 3px rgba(17,24,39,0.05); transition: box-shadow .24s var(--ease), border-color .24s var(--ease), transform .24s var(--ease); }
-.content .sec:hover { border-color: var(--line-2); box-shadow: 0 14px 34px -16px rgba(17,24,39,0.18); }
-.content .sec[open] { border-color: rgba(61,93,230,0.30); box-shadow: 0 18px 46px -18px rgba(61,93,230,0.24); }
-.content .sec > summary { padding: clamp(17px,2.6vh,24px) clamp(18px,3vw,26px); gap: 18px; border-radius: 16px; }
-.content .sec > summary h2 { font-size: clamp(1.12rem,2.5vw,1.4rem); }
-.content .sec > summary::after { content: ""; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--raised) no-repeat center; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="%233d5de6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'); transition: transform .28s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease); }
-.content .sec:hover > summary::after { border-color: var(--accent); }
-.content .sec[open] > summary::after { transform: rotate(180deg); background-color: var(--accent-soft); border-color: rgba(61,93,230,0.42); }
-.content .sec-body { padding: 0 clamp(18px,3vw,26px) clamp(20px,3vh,28px); }
-.content .sec-body > p:first-child, .content .sec-body > ul:first-child, .content .sec-body > ol:first-child { margin-top: 0; }
-.content #faq .qa { border-radius: 12px; margin: 0 0 10px; transition: border-color .2s var(--ease), box-shadow .2s var(--ease); }
-.content #faq .qa:hover { box-shadow: 0 8px 22px -12px rgba(17,24,39,0.14); }
-.content #faq .qa[open] { border-color: rgba(61,93,230,0.28); }
-/* ── stake hero (premium dark band, reference-grade) ── */
-.shero { position: relative; overflow: hidden; min-height: calc(100dvh - 48px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: clamp(48px,9vh,104px) 24px clamp(44px,7vh,84px); background: #0a0d15; color: #fff; border-bottom: 1px solid var(--line); }
-.shero::before { content:""; position:absolute; top:-18%; left:50%; transform:translateX(-50%); width:min(1100px,120vw); height:620px; background: radial-gradient(50% 55% at 50% 40%, var(--accent-glow), transparent 70%); opacity:.95; pointer-events:none; }
-.shero::after { content:""; position:absolute; inset:0; background-image: linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px,transparent 1px); background-size: 30px 30px; -webkit-mask: radial-gradient(80% 70% at 50% 30%, #000, transparent 75%); mask: radial-gradient(80% 70% at 50% 30%, #000, transparent 75%); pointer-events:none; }
-.shero-inner { position: relative; z-index: 2; width: 100%; max-width: 900px; }
-.shero-emblem { width: 76px; height: 76px; margin: 0 auto 26px; border-radius: 22px; display: grid; place-items: center; background: linear-gradient(160deg, rgba(255,255,255,.16), rgba(255,255,255,.03)); box-shadow: 0 24px 60px -18px var(--accent-glow), inset 0 0 0 1px rgba(255,255,255,.14); }
-.shero-emblem img { width: 42px; height: 42px; }
-.shero-kicker { margin: 0 0 15px; text-transform: uppercase; letter-spacing: .22em; font-size: 11px; font-weight: 800; color: var(--accent); }
-.shero-h { margin: 0; font-size: clamp(2.1rem,5.6vw,3.5rem); line-height: 1.05; font-weight: 850; letter-spacing: -.03em; color: #fff; }
-.shero-sub { margin: 16px auto 0; max-width: 56ch; font-size: 16px; line-height: 1.6; color: rgba(255,255,255,.66); }
-.shero-sub strong { color: #fff; font-weight: 700; }
-.shero-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; justify-content: center; margin: 30px 0 0; }
-.sbtn { display: inline-flex; align-items: center; gap: 9px; padding: 14px 26px; border-radius: 13px; font-weight: 750; font-size: 15px; cursor: pointer; transition: transform .16s var(--ease), box-shadow .16s var(--ease), background-color .16s var(--ease), border-color .16s var(--ease); }
-.sbtn-primary { background: var(--accent); color: #fff; padding: 16px 34px; font-size: 16px; box-shadow: 0 16px 38px -12px var(--accent-glow); }
-.sbtn-primary:hover { transform: translateY(-2px); }
-.sbtn-primary .cta-go { transition: transform .18s var(--ease); }
-.sbtn-primary:hover .cta-go { transform: translateX(3px); }
-.sbtn-ghost { background: rgba(255,255,255,.05); color: #fff; padding: 11px 20px; font-size: 13.5px; border: 1px solid rgba(255,255,255,.17); }
-.sbtn-ghost:hover { border-color: rgba(255,255,255,.42); background: rgba(255,255,255,.09); }
-.shero-kpis { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 44px auto 0; max-width: 900px; }
-.kpi { flex: 1 1 168px; max-width: 240px; display: flex; align-items: center; gap: 9px; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 11px 14px; text-align: left; }
-.kpi svg { width: 15px; height: 15px; color: var(--accent); flex: none; }
-.kpi span { font-size: 12.5px; font-weight: 650; color: rgba(255,255,255,.84); line-height: 1.3; }
-.shero .scroll-cue { position: absolute; left: 0; right: 0; bottom: 14px; z-index: 2; }
-.shero .scroll-cue a { color: rgba(255,255,255,.5); }
-.shero .scroll-cue a:hover { color: #fff; }
-@media (max-width: 720px) {
-  .shero { min-height: 0; padding: 46px 18px 40px; }
-  .shero-kpis { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .shero .scroll-cue { display: none; }
-}
-/* docs layout (sticky TOC + open sections) */
-.docs{position:relative;width:min(1120px,calc(100vw - 44px));margin-left:50%;transform:translateX(-50%);display:grid;grid-template-columns:236px minmax(0,1fr);gap:clamp(28px,4vw,60px);margin-top:clamp(40px,6vh,72px);align-items:start}
-.toc{position:sticky;top:74px;align-self:start;max-height:calc(100dvh - 96px);overflow:auto}
-.toc-h{margin:0 0 10px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding-left:13px}
-.toc a{display:block;padding:7px 13px;border-left:2px solid var(--line);color:var(--muted);font-size:13px;font-weight:600;line-height:1.35;text-decoration:none;transition:color .15s var(--ease),border-color .15s var(--ease)}
-.toc a:hover{color:var(--ink)}
-.toc a.active{color:var(--accent-2);border-left-color:var(--accent);font-weight:750}
-.doc-main{min-width:0}
-.content .doc-sec{border:1px solid var(--line);border-radius:20px;background:var(--panel);box-shadow:0 1px 3px rgba(17,24,39,.04);margin:0 0 16px;padding:0;scroll-margin-top:82px;transition:box-shadow .26s var(--ease),border-color .26s var(--ease)}
-.content .doc-sec:first-child{border-top:1px solid var(--line)}
-.content .doc-sec:hover{border-color:var(--line-2);box-shadow:0 16px 40px -22px rgba(17,24,39,.18)}
-.content .doc-sec[open]{border-color:var(--line)}
-.content .doc-sec>summary{cursor:default;pointer-events:none;padding:clamp(20px,3vh,28px) clamp(22px,3.2vw,32px) 8px;list-style:none}
-.content .doc-sec>summary::-webkit-details-marker{display:none}
-.content .doc-sec>summary::after{display:none}
-.content .doc-sec>summary h2{font-size:clamp(1.2rem,2.3vw,1.5rem)}
-.content .doc-sec .sec-body{padding:0 clamp(22px,3.2vw,32px) clamp(22px,3.4vh,30px);max-width:74ch}
-.content .doc-sec.field-notes{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:20px;background:var(--panel);box-shadow:0 1px 3px rgba(17,24,39,.04);margin:0 0 16px;padding:clamp(22px,3vh,28px) clamp(22px,3.2vw,32px)}
-.content .doc-sec.field-notes h2{font-size:clamp(1.2rem,2.3vw,1.5rem)}
-.content .doc-sec.field-notes .fn-body{max-width:74ch}
-@media (max-width:900px){
-  .docs{grid-template-columns:1fr;width:calc(100vw - 28px);gap:0}
-  .toc{position:sticky;top:56px;z-index:20;display:flex;gap:8px;overflow-x:auto;max-height:none;background:var(--bg);padding:11px 2px;margin:0 0 6px;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
-  .toc-h{display:none}
-  .toc a{flex:0 0 auto;white-space:nowrap;border-left:0;border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:12.5px}
-  .toc a.active{color:var(--accent-2);border-color:var(--accent);background:var(--accent-soft)}
-}
-.site-foot{width:min(1120px,calc(100vw - 44px));margin:clamp(34px,5vh,60px) auto 0;padding:22px 2px clamp(30px,4vh,48px);color:var(--faint);font-size:12.5px;line-height:1.6}
-.site-foot p{margin:0 0 6px;max-width:82ch}
-.site-foot strong{color:var(--muted);font-weight:700}
-.site-foot .foot-fine{font-size:11.5px}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Liquid Staking — Stake and Still Use Your Capital</title>
+  <meta name="description" content="Liquid Staking explained: stake ETH or another asset, receive a liquid staking token that accrues rewards, and keep using it across DeFi. Rewards calculator, risks and redemption inside.">
+  <link rel="canonical" href="https://liquidstaking.github.io/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Liquid Staking">
+  <meta property="og:description" content="Liquid Staking explained: stake ETH or another asset, receive a liquid staking token that accrues rewards, and keep using it across DeFi. Rewards calculator, risks and redemption inside.">
+  <meta property="og:url" content="https://liquidstaking.github.io/">
+  <meta property="og:image" content="https://liquidstaking.github.io/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Liquid Staking">
+  <meta name="twitter:description" content="Liquid Staking explained: stake ETH or another asset, receive a liquid staking token that accrues rewards, and keep using it across DeFi. Rewards calculator, risks and redemption inside.">
+  <meta name="twitter:image" content="https://liquidstaking.github.io/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "@id": "https://liquidstaking.github.io/#website", "url": "https://liquidstaking.github.io/", "name": "Liquid Staking — Stake and Still Use Your Capital"}, {"@type": "WebPage", "@id": "https://liquidstaking.github.io/#webpage", "url": "https://liquidstaking.github.io/", "name": "Liquid Staking — Stake and Still Use Your Capital", "isPartOf": {"@id": "https://liquidstaking.github.io/#website"}, "description": "Liquid Staking explained: stake ETH or another asset, receive a liquid staking token that accrues rewards, and keep using it across DeFi. Rewards calculator, risks and redemption inside.", "datePublished": "2026-10-09", "dateModified": "2026-10-09"}, {"@type": "SoftwareApplication", "name": "Liquid Staking", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://liquidstaking.github.io/"}, {"@type": "ListItem", "position": 2, "name": "Staking"}, {"@type": "ListItem", "position": 3, "name": "Liquid Staking"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is Liquid Staking in simple terms?", "acceptedAnswer": {"@type": "Answer", "text": "Liquid Staking is staking an asset like ETH through a protocol that gives you a token back — an LST — representing your stake and its rewards, so you keep a usable, tradable asset instead of locked, idle capital."}}, {"@type": "Question", "name": "How is Liquid Staking different from regular staking?", "acceptedAnswer": {"@type": "Answer", "text": "Regular, native staking locks your asset with a validator and gives you nothing to hold until you exit. Liquid Staking mints a token the moment you deposit, so you have a liquid asset you can use elsewhere while the underlying stake keeps earning."}}, {"@type": "Question", "name": "What is a liquid staking token (LST)?", "acceptedAnswer": {"@type": "Answer", "text": "An LST is the token a Liquid Staking protocol mints against your deposit. It tracks your staked balance plus rewards, either by growing in quantity (rebasing) or by rising in exchange rate against the underlying asset, and it trades freely on its own."}}, {"@type": "Question", "name": "Is Liquid Staking the same as restaking?", "acceptedAnswer": {"@type": "Answer", "text": "No. Liquid Staking produces the token; restaking is a separate, optional step where that token is redeposited into another protocol to secure extra services for extra yield and extra risk."}}, {"@type": "Question", "name": "Can a liquid staking token lose its peg?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. An LST can trade below its redemption value during heavy selling or when a large holder exits quickly, since market demand for liquidity can outpace arbitrage. The gap is usually temporary but is a real risk for anyone selling during the dip."}}, {"@type": "Question", "name": "How do I get my original asset back from Liquid Staking?", "acceptedAnswer": {"@type": "Answer", "text": "You can sell the LST on the open market for instant liquidity, or redeem it directly with the protocol through an exit queue that releases the underlying asset once validators are unwound, which can take hours to days."}}, {"@type": "Question", "name": "What risks does Liquid Staking carry that native staking doesn't?", "acceptedAnswer": {"@type": "Answer", "text": "Liquid Staking adds smart-contract and protocol risk on top of ordinary validator and slashing risk, since you are trusting the staking protocol's code and its node-operator set, not just a single validator."}}]}]}</script>
+  <style>
+    :root{--bg:#0C0F16;--surface:#161B26;--text:#E8EDF5;--muted:#8892A3;--accent:#22D3EE;--accent-ink:#031417;--radius:18px;--display:"Outfit";--body:"Inter"}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:2rem}
+    body{margin:0;background:var(--bg);color:var(--text);font:400 1rem/1.7 var(--body);-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-underline-offset:.22em}
+    a:hover{text-decoration-thickness:2px}
+    :focus-visible{outline:3px solid var(--accent);outline-offset:5px}
+    ::selection{background:var(--accent);color:var(--accent-ink)}
+    h1,h2,h3,p{margin:0}
+    h1,h2,h3{font-family:var(--display);text-wrap:balance}
+    svg{display:block;flex-shrink:0}
+    img{max-width:100%;height:auto}
+    .c1ac6e9{width:min(1180px,calc(100% - 64px));margin-inline:auto}
+    .c4e9333{position:absolute;top:1rem;left:1rem;z-index:10;transform:translateY(-200%);padding:.7rem 1rem;background:var(--surface);border-radius:var(--radius)}
+    .c4e9333:focus{transform:translateY(0)}
+    .cefefcd{min-height:96px;display:flex;align-items:center;justify-content:space-between;gap:2rem;border-bottom:1px solid color-mix(in srgb,var(--text) 10%,transparent)}
+    .cfdd3a6{display:inline-flex;align-items:center;gap:.7rem;color:var(--text);font:600 1.2rem/1 var(--display);letter-spacing:-.04em;text-decoration:none}
+    .c9f2347{display:grid;place-items:center;width:38px;height:38px;background:var(--accent);color:var(--accent-ink);border-radius:var(--radius)}
+    .cdd3a3a{display:flex;align-items:center;gap:1.8rem}
+    .cdd3a3a>a{font-size:.88rem;font-weight:600;color:var(--text);text-decoration:none}
+    .cdd3a3a>a:hover{color:var(--accent)}
+    .cdd3a3a .c9166bc{padding:.65rem 1rem;border:1px solid color-mix(in srgb,var(--text) 18%,transparent);border-radius:var(--radius)}
+    .ceb1565{padding-top:1.6rem;font-size:.8rem;color:var(--muted)}
+    .c968d8a{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;color:var(--muted)}
+    ol.c968d8a,ul.c968d8a,.c968d8a ol,.c968d8a ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.5rem}
+    .c968d8a a{color:var(--muted);text-decoration:none}
+    .c968d8a a:hover{color:var(--accent)}
+    .c968d8a [aria-current]{color:var(--text)}
+    .c68eca0{position:relative;display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);align-items:center;gap:clamp(2rem,6vw,5.5rem);padding-block:4.5rem 5.5rem}
+    .cbab356{display:inline-flex;align-items:center;gap:.5rem;margin-bottom:1.35rem;color:var(--accent);font-size:.86rem;font-weight:600}
+    .cbab356::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 10%,transparent)}
+    h1{font-size:clamp(2.5rem,4.8vw,4.7rem);line-height:1.06;letter-spacing:-.055em;overflow-wrap:anywhere}
+    h1 em{color:var(--accent);font-style:normal}
+    .cd98579{margin-top:1.5rem;max-width:49ch;font-size:1.06rem;line-height:1.85;color:var(--muted)}
+    .cf938ba{display:inline-flex;justify-content:center;align-items:center;gap:1.15rem;min-height:54px;padding:.9rem 1.4rem;border:1px solid color-mix(in srgb,var(--accent-ink) 12%,transparent);border-radius:var(--radius);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 88%,var(--surface)),var(--accent));box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent-ink);font:600 .95rem/1.4 var(--body);text-decoration:none;transition:transform .2s,box-shadow .2s}
+    .cf938ba:hover{transform:translateY(-2px);box-shadow:0 12px 26px color-mix(in srgb,var(--accent) 26%,transparent)}
+    .c686e4f>.cf938ba{margin-top:2rem}
+    .c7b259c{margin-top:1.1rem;color:var(--muted);font-size:.8rem}
+    .ceab462{position:relative;isolation:isolate;min-width:0;padding:1.7rem;background:var(--surface);border:1px solid color-mix(in srgb,var(--text) 10%,transparent);border-radius:calc(var(--radius) * 1.5);box-shadow:0 28px 70px -20px color-mix(in srgb,var(--text) 19%,transparent),0 3px 10px color-mix(in srgb,var(--text) 4%,transparent)}
+    .ceab462::before{content:"";position:absolute;inset:-28px;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 80% 20%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 68%);border-radius:calc(var(--radius) * 2)}
+    .ccfdeaf{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.5rem}
+    .ccfdeaf h2{font-size:1.15rem;letter-spacing:-.035em}
+    .c15f313{padding:.25rem .65rem;border-radius:var(--radius);background:color-mix(in srgb,var(--accent) 10%,var(--surface));color:var(--accent);font-size:.72rem;font-weight:600}
+    .cfba844{display:grid;grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr);align-items:center;gap:.6rem;padding:1rem;border:1px solid color-mix(in srgb,var(--text) 9%,transparent);border-radius:var(--radius);background:color-mix(in srgb,var(--bg) 65%,var(--surface))}
+    .c90b693{min-width:0;display:flex;align-items:center;gap:.7rem}
+    .c90b693:last-child{justify-content:flex-end}
+    .cb67af2{font-size:.76rem;color:var(--muted)}
+    .ca286d4{min-width:0;display:flex;align-items:center;justify-content:center;max-width:100px;min-height:38px;overflow-wrap:anywhere}
+    .ca286d4 img,.ca286d4 svg{max-width:100%;max-height:38px;object-fit:contain}
+    .route-arrow{display:grid;place-items:center;width:34px;height:34px;border:1px solid color-mix(in srgb,var(--text) 10%,transparent);border-radius:50%;color:var(--accent);background:var(--surface)}
+    .c2d0b8f{margin-top:1.5rem}
+    .c06bf3c{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:.55rem}
+    .c06bf3c label{font-size:.85rem;font-weight:600}
+    .cc85320{font-size:.74rem;color:var(--muted)}
+    .c55dffb{display:flex;align-items:center;gap:.8rem;padding:.85rem 1rem;border:1px solid color-mix(in srgb,var(--text) 20%,transparent);border-radius:var(--radius);background:var(--bg);transition:border-color .2s,box-shadow .2s}
+    .c55dffb:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}
+    .c55dffb:has([aria-invalid="true"]){border-color:var(--accent)}
+    .c55dffb input{width:100%;min-width:0;padding:0;border:0;outline:none;background:var(--bg);color:var(--text);font:500 2rem/1.25 var(--display);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+    .c55dffb input::placeholder{color:var(--muted)}
+    .c55dffb>span{font-size:.8rem;color:var(--muted)}
+    .cfcf7b4{min-height:1.4em;margin-top:.5rem;font-size:.73rem;color:var(--muted)}
+    .c9033d8{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-top:1.3rem}
+    .c9033d8 .c2d0b8f{margin-top:0}
+    .cb683a6{position:relative}
+    .cb683a6::after{content:"";position:absolute;right:.95rem;top:50%;width:.5rem;height:.5rem;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+    .c04b590{width:100%;padding:.85rem 2rem .85rem 1rem;border:1px solid color-mix(in srgb,var(--text) 20%,transparent);border-radius:var(--radius);background:var(--bg);color:var(--text);font:500 1.05rem/1.3 var(--display);letter-spacing:-.02em;appearance:none;-webkit-appearance:none;cursor:pointer}
+    .c04b590:focus-visible{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}
+    .ce4ea54{margin-top:1.3rem;padding:1.25rem;border:1px solid color-mix(in srgb,var(--accent) 17%,transparent);border-radius:var(--radius);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 10%,var(--surface)),color-mix(in srgb,var(--accent) 3%,var(--surface)))}
+    .cdf077c{font-size:.8rem;color:var(--muted)}
+    .c4c2dd3{display:flex;align-items:baseline;flex-wrap:wrap;gap:.5rem;margin:.25rem 0 1rem}
+    .c4c2dd3 output{font:600 clamp(1.8rem,3vw,2.6rem)/1.2 var(--display);letter-spacing:-.05em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+    .c4c2dd3 span{font-size:.8rem;color:var(--muted)}
+    .caab8a6{display:grid;gap:.5rem;margin:0;padding-top:.9rem;border-top:1px solid color-mix(in srgb,var(--accent) 14%,transparent);font-size:.82rem}
+    .caab8a6>div{display:flex;justify-content:space-between;gap:1rem}
+    .caab8a6 dt{color:var(--muted)}
+    .caab8a6 dd{margin:0;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+    .ceab462>.cf938ba{width:100%;margin-top:1.2rem}
+    .c486a05{margin-top:1rem;font-size:.75rem;color:var(--muted)}
+    .c486a05 summary{cursor:pointer;width:fit-content;text-underline-offset:.2em}
+    .c486a05 summary:hover{color:var(--accent)}
+    .c486a05 p{margin-top:.55rem;line-height:1.7}
+    .c6ba683{padding:2rem 2.25rem;border:1px solid color-mix(in srgb,var(--text) 10%,transparent);border-radius:var(--radius);background:var(--surface)}
+    .c3e8208{font:600 1.4rem/1.3 var(--display);letter-spacing:-.035em;margin-bottom:1.25rem}
+    .caae6ae{overflow-x:auto}
+    .c251c4d{width:100%;border-collapse:collapse;text-align:left;font-size:.9rem}
+    .c251c4d caption{text-align:left;margin-bottom:1rem;color:var(--muted)}
+    .c251c4d th,.c251c4d td{padding:1rem 1.2rem;border-bottom:1px solid color-mix(in srgb,var(--text) 8%,transparent);vertical-align:top}
+    .c251c4d th:first-child,.c251c4d td:first-child{padding-left:0}
+    .c251c4d th:last-child,.c251c4d td:last-child{padding-right:0}
+    .c251c4d th{font-weight:600;color:var(--text)}
+    .c251c4d td{color:var(--muted)}
+    .c251c4d tbody tr:last-child>*{border-bottom:0}
+    .c251c4d thead{background:color-mix(in srgb,var(--accent) 5%,var(--surface))}
+    .c6c6bc5{max-width:820px;margin:4.5rem auto}
+    .cbc1961{margin-block:0 3rem;padding-bottom:2.75rem;border-bottom:1px solid color-mix(in srgb,var(--text) 10%,transparent)}
+    .c61df2e{margin:0 0 1.2rem;font:600 clamp(1.65rem,3vw,2.25rem)/1.2 var(--display);letter-spacing:-.04em}
+    .ceed6bc{color:var(--muted);line-height:1.9;overflow-wrap:anywhere}
+    .ceed6bc p+p{margin-top:1.1rem}
+    .ceed6bc h3{margin:1.8rem 0 .7rem;font-size:1.25rem;line-height:1.4;color:var(--text)}
+    .ceed6bc strong{color:var(--text);font-weight:600}
+    .ceed6bc ul,.ceed6bc ol{padding-left:1.4rem;margin-block:1.2rem}
+    .ceed6bc li+li{margin-top:.55rem}
+    .ceed6bc li::marker{color:var(--accent)}
+    .ceed6bc blockquote{margin:1.5rem 0;padding:1rem 1.4rem;border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;background:color-mix(in srgb,var(--accent) 6%,var(--surface));color:var(--text)}
+    .cd42f7b{margin-block:.8rem;border:1px solid color-mix(in srgb,var(--text) 12%,transparent);border-radius:var(--radius);background:var(--surface);overflow:hidden}
+    .cb110cd{position:relative;cursor:pointer;padding:1.2rem 3.3rem 1.2rem 1.35rem;list-style:none;font:500 1.05rem/1.5 var(--display);color:var(--text)}
+    .cb110cd::-webkit-details-marker{display:none}
+    .cb110cd::after{content:"+";position:absolute;right:1.35rem;top:1.15rem;color:var(--accent);font-size:1.3rem}
+    .cd42f7b[open]>.cb110cd::after{content:"в€’"}
+    .cd42f7b[open]{border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+    .cb110cd:focus-visible{outline-offset:-5px;border-radius:var(--radius)}
+    .c3706c3{padding:0 1.35rem 1.35rem;color:var(--muted);font-size:.95rem;line-height:1.85;overflow-wrap:anywhere}
+    .c3706c3 p+p{margin-top:.8rem}
+    .ca273ce{padding:2rem 2.25rem;border-radius:var(--radius);background:color-mix(in srgb,var(--surface) 75%,var(--bg));border:1px solid color-mix(in srgb,var(--text) 8%,transparent)}
+    .c3d8870{margin:0;padding-left:1.2rem;color:var(--muted);font-size:.86rem}
+    .ca3e22b{padding:.35rem 0 .35rem .3rem;overflow-wrap:anywhere}
+    .ca3e22b::marker{color:var(--muted)}
+    .ca3e22b a{color:var(--text);text-decoration-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+    .ca3e22b a:hover{color:var(--accent)}
+    .c7ab05f{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-top:3rem;padding-block:1.7rem 2rem;border-top:1px solid color-mix(in srgb,var(--text) 10%,transparent);color:var(--muted);font-size:.78rem}
+    .c45307f{font:600 .95rem/1.4 var(--display);color:var(--text)}
+    @media(min-width:1400px){.c68eca0{padding-block:5.5rem 6.5rem}}
+    @media(max-width:900px){.c68eca0{gap:2rem;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ceab462{padding:1.25rem}.cfba844{padding:.8rem}.c90b693{flex-direction:column;gap:.25rem}.c90b693:last-child{flex-direction:column-reverse}h1{font-size:clamp(2.5rem,5.5vw,4rem)}}
+    @media(max-width:720px){.c1ac6e9{width:calc(100% - 40px)}.cefefcd{min-height:78px;gap:1rem}.cdd3a3a{gap:1rem}.cdd3a3a>.cf0d784{display:none}.c68eca0{grid-template-columns:minmax(0,1fr);padding-block:2.75rem 3rem;gap:2.5rem}.c686e4f{max-width:560px}h1{font-size:clamp(2.6rem,9vw,4rem)}.cd98579{font-size:1rem}.ceab462{width:100%;max-width:520px;justify-self:center;padding:1.5rem}.c90b693,.c90b693:last-child{flex-direction:row}.c6ba683,.ca273ce{padding:1.5rem}.c6c6bc5{margin-block:3rem}.c251c4d th,.c251c4d td{padding:.85rem .75rem}.cbc1961{margin-bottom:2rem;padding-bottom:2rem}.c7ab05f{margin-top:2rem}}
+    @media(max-width:380px){.c1ac6e9{width:calc(100% - 28px)}.ceab462{padding:1rem}.cfdd3a6{font-size:1.05rem}.cdd3a3a .c9166bc{padding:.55rem .7rem}.c90b693,.c90b693:last-child{flex-direction:column}.c90b693:last-child{flex-direction:column-reverse}.c6ba683,.ca273ce{padding:1.1rem}.caab8a6{font-size:.76rem}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
   </style>
-<meta content="website" property="og:type"/><meta content="https://liquidstaking.github.io/" property="og:url"/>
-<meta content="Liquid Staking — Dashboard" property="og:title"/>
-<meta content="Liquid staking explained by practitioners: how LSTs work, how rewards accrue, your protocol options, custody tradeoffs, slashing and depeg risks, and how to exit." property="og:description"/>
-<meta content="Liquid Staking" property="og:site_name"/><meta content="https://liquidstaking.github.io/og-cover.png" property="og:image"/>
-<meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="Liquid Staking — independent staking dashboard" property="og:image:alt"/>
-<meta content="summary_large_image" name="twitter:card"/><meta content="Liquid Staking — Dashboard" name="twitter:title"/>
-<meta content="Liquid staking explained by practitioners: how LSTs work, how rewards accrue, your protocol options, custody tradeoffs, slashing and depeg risks, and how to exit." name="twitter:description"/><meta content="https://liquidstaking.github.io/og-cover.png" name="twitter:image"/>
-<script type="application/ld+json">
-  {"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "@id": "https://liquidstaking.github.io/#website", "url": "https://liquidstaking.github.io/", "name": "Liquid Staking", "inLanguage": "en"}, {"@type": "Thing", "@id": "https://liquidstaking.github.io/#brand", "name": "Liquid Staking", "alternateName": ["Liquid staking"], "description": "Liquid Staking — how it works, rewards, risks, and how to stake, on an independent non-custodial dashboard.", "sameAs": ["https://ethereum.org/staking/", "https://ethereum.org/staking/pools/", "https://www.coingecko.com/en/coins/lido-staked-ether", "https://ethereum.org/staking/withdrawals/", "https://docs.lido.fi/security/audits/"]}, {"@type": "WebPage", "@id": "https://liquidstaking.github.io/#webpage", "url": "https://liquidstaking.github.io/", "name": "Liquid Staking — Dashboard", "description": "Liquid staking explained by practitioners: how LSTs work, how rewards accrue, your protocol options, custody tradeoffs, slashing and depeg risks, and how to exit.", "isPartOf": {"@id": "https://liquidstaking.github.io/#website"}, "about": {"@id": "https://liquidstaking.github.io/#brand"}, "mainEntity": {"@id": "https://liquidstaking.github.io/#brand"}, "inLanguage": "en", "dateModified": "2026-07-21"}, {"@type": "FAQPage", "@id": "https://liquidstaking.github.io/#faq", "mainEntity": [{"@type": "Question", "name": "Is liquid staking safe?", "acceptedAnswer": {"@type": "Answer", "text": "It's risk-layered, not risk-free. You inherit staking risks (slashing, validator downtime, asset price) and add smart-contract, governance, oracle, liquidity, and LST depeg risk. Audits reduce software risk but never eliminate it — size your position accordingly."}}, {"@type": "Question", "name": "How are rewards and APY determined?", "acceptedAnswer": {"@type": "Answer", "text": "Rewards come from network issuance and validator-collected fees, minus the protocol's disclosed fee on rewards. The rate is variable — it shifts with total network stake, validator performance, and fee conditions — so the current figure is always shown live in the protocol's app rather than guaranteed anywhere."}}, {"@type": "Question", "name": "How much do I need to start?", "acceptedAnswer": {"@type": "Answer", "text": "Far less than solo staking: liquid staking pools remove validator minimums like Ethereum's 32 ETH, so you can deposit small amounts. Your real floor is network transaction fees — on some chains, fees can eat a meaningful slice of a very small deposit."}}, {"@type": "Question", "name": "How do I unstake, and how long does it take?", "acceptedAnswer": {"@type": "Answer", "text": "Two routes: redeem through the protocol, which queues your withdrawal against network and provider exit queues (hours to days depending on congestion), or sell the LST on a market instantly at whatever price liquidity offers. Redemption is patient and precise; selling is fast and market-priced."}}, {"@type": "Question", "name": "What are the main options for liquid staking?", "acceptedAnswer": {"@type": "Answer", "text": "Decentralized pooled protocols (you hold the LST in your own wallet — see how a major protocol structures this), chain-native stake pools on networks like Solana, and custodial exchange products. The core tradeoff is key control and transparency versus convenience and counterparty trust."}}, {"@type": "Question", "name": "Is this the official liquid staking site?", "acceptedAnswer": {"@type": "Answer", "text": "No — this is an independent reference page and isn't affiliated with, endorsed by, or operated by any staking protocol. There is no single official liquid staking site; each protocol and network runs separately, so always confirm terms in the official app of the service you use."}}]}]}
-  </script>
-<link href="dashboard/index.html" rel="prefetch"/><link href="dashboard/index.html" rel="prerender"/></head>
+</head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
-<div class="shell">
-<main class="main" id="main">
-<header class="topbar">
-<div class="topbar-left">
-<h1 class="wordmark">Liquid Staking</h1>
-</div>
-<div class="topbar-right"><div aria-label="Live metrics" class="ticker">
-<a aria-label="Liquid" class="tick" href="https://www.coingecko.com/en/coins/ethereum" rel="noopener noreferrer" target="_blank"><span>Liquid</span> <b id="sig-ethereum">…</b> <span aria-hidden="true" class="ext">↗</span></a>
-<a aria-label="Market cap" class="tick" href="https://coinmarketcap.com/currencies/ethereum/" rel="noopener noreferrer" target="_blank"><span>Market cap</span> <b id="sig-mc-ethereum">…</b> <span aria-hidden="true" class="ext">↗</span></a>
-</div>
-</div>
-</header>
-<section class="shero" id="gateway">
-<div class="shero-inner">
-<div class="shero-emblem"><img alt="Liquid staking asset on Liquidstaking" height="42" src="eth.png" width="42"/></div>
-<p class="shero-kicker">Staking Infrastructure</p>
-<h2 class="shero-h">Stake Without Locking Your Capital</h2>
-<p class="shero-sub"><strong>Liquid Staking</strong> lets you deposit into a staking pool, keep earning validation rewards, and hold a transferable token you can trade or use in DeFi anytime.</p>
-<div class="shero-cta">
-<a class="sbtn sbtn-primary" href="dashboard/" rel="noopener noreferrer" target="_blank">Open the staking app <span aria-hidden="true" class="cta-go">↗</span></a>
-<a class="sbtn sbtn-ghost" href="#what">Read the guide</a>
-</div>
-<div class="shero-kpis">
-<div class="kpi"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg><span>Transferable receipt token</span></div>
-<div class="kpi"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg><span>Non-custodial options exist</span></div>
-<div class="kpi"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg><span>Redemption follows queues</span></div>
-</div>
-</div>
-<div class="scroll-cue"><a href="#what"><span>What is Liquid Staking</span><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></a></div>
-</section>
-<div class="content">
-<div class="lead-in reveal">
-<div class="feat">
-<div class="feat-l">
-<h2>Liquidstaking Protocol &amp; Receipt Token Overview</h2>
-<p class="feat-lead">Liquid staking solves the oldest annoyance in proof-of-stake: your capital is productive but frozen.</p>
-<div class="feat-cta"><a class="feat-btn" href="dashboard/" rel="noopener noreferrer" target="_blank">Enter Staking Dashboard <span aria-hidden="true" class="arr">→</span></a></div>
-<details class="feat-more">
-<summary class="feat-readmore">Read more <svg aria-hidden="true" class="chev" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></summary>
-<div class="feat-detail">
-<p>You deposit an asset like ETH into a pooled staking protocol, the contracts route it to validators, and you receive a liquid staking token (LST) that represents your claim on the pool — that token can be traded or deployed in DeFi while the underlying keeps validating. Most major implementations, like <a href="https://lido.fi/how-lido-works">Lido's pooled staking model</a>, are non-custodial in the sense that you hold the LST in your own wallet — but the contracts, operators, and governance still matter. This page is an independent reference, not affiliated with any protocol; <a href="https://ethereum.org/staking/">Ethereum's own staking documentation</a> is the right starting point for network-level mechanics.</p>
-<div class="feat-facts">
-<div class="feat-fact"><span class="fl">Asset / network</span><span class="fv">Any supported PoS asset — ETH on Ethereum is the largest market; Solana and Cosmos have their own implementations</span></div>
-<div class="feat-fact"><span class="fl">How it works</span><span class="fv">Deposit into audited pool contracts; validators run by operators; you receive an LST representing your share</span></div>
-<div class="feat-fact"><span class="fl">Rewards</span><span class="fv">Accrue via rebasing balance or a rising redemption rate; variable, set by network issuance and provider fees — check the current rate in the app</span></div>
-<div class="feat-fact"><span class="fl">Custody</span><span class="fv">You control the LST wallet in non-custodial designs; contracts and operators still execute the staking — verify each service</span></div>
-<div class="feat-fact"><span class="fl">Lock-up / exit</span><span class="fv">No fixed lock, but redemption waits on network/provider exit queues; instant exit means selling the LST on a market</span></div>
-<div class="feat-fact"><span class="fl">Verify</span><span class="fv">Contract audits, operator set, redemption mechanism, fee terms, and the LST's market-versus-redemption price history</span></div>
-</div>
-</div>
-</details>
-</div>
-<div class="feat-r"><span class="feat-badge"><img alt="Liquid Staking" height="72" src="eth.png" width="72"/></span></div>
-</div>
-</div>
-<div class="docs">
-<nav aria-label="On this page" class="toc">
-<p class="toc-h">On this page</p>
-<a href="#what">What is Liquidstaking?</a>
-<a href="#how">How it works</a>
-<a href="#ways">Your options</a>
-<a href="#rewards">Rewards and APY</a>
-<a href="#risks">Risks and lock-up</a>
-<a href="#howto">How to start</a>
-<a href="#withdraw">Unstaking and withdrawals</a>
-<a href="#faq">Liquid FAQ</a>
-<a href="#notes">Notes before you stake</a>
-</nav>
-<div class="doc-main">
-<details class="sec reveal doc-sec" id="what" open="">
-<summary><h2>What is Liquidstaking?</h2></summary>
-<div class="sec-body">Liquid staking is pooled staking with a transferable receipt for a position secured by a <a href="https://en.wikipedia.org/wiki/Proof_of_stake" rel="noopener noreferrer" target="_blank">proof-of-stake network</a>. Instead of running your own validator (32 ETH and uptime responsibility on Ethereum) or locking into an illiquid position, you deposit into a protocol that aggregates user funds and delegates them to professional validators. In return, the protocol mints you a liquid staking token — an <a href="https://eips.ethereum.org/EIPS/eip-20" rel="noopener noreferrer" target="_blank">ERC-20 token</a> on Ethereum, an SPL token on Solana, or a chain-native format elsewhere. That LST is your claim on the pooled position: it can be transferred, sold, or used as collateral in compatible DeFi while the underlying asset keeps earning staking rewards. Ordinary staking gives you no transferable receipt — your position stays put until you exit. Restaking is a different beast entirely, using already-staked assets to secure additional services for extra rewards and extra risk. Liquid staking sits in the middle: more flexibility than solo staking, less complexity than restaking, but with protocol and market risks layered on top of base staking risk.</div>
-</details>
-<details class="sec reveal doc-sec" id="how" open="">
-<summary><h2>How it works</h2></summary>
-<div class="sec-body">Liquid staking works in three stages: you deposit a supported asset, contracts delegate it across validator operators, and the protocol mints an LST to your wallet. You connect a self-custody wallet to a verified protocol front-end and deposit a supported asset. The smart contracts pool your deposit with everyone else's and delegate it across a set of validator operators, the same tokenized model described in <a href="https://arxiv.org/abs/2404.00644" rel="noopener noreferrer" target="_blank">liquid-staking research</a>. The moment your deposit confirms, the protocol mints an LST to your wallet at the current exchange rate. From then on, validator rewards and penalties change the pool's net backing, and your LST reflects that one of two ways: rebasing (your token balance grows daily) or a changing redemption rate (your token count stays fixed but each token redeems for more underlying). Exit happens in two ways: redeem through the protocol, which burns your LST and queues you for the underlying asset, or sell the LST on a market immediately. The second route is faster but exposes you to price impact and any discount the market is pricing in.</div>
-</details>
-<details class="sec reveal doc-sec" id="ways" open="">
-<summary><h2>Your options</h2></summary>
-<div class="sec-body">Liquid-staking choices are three routes: decentralized pooled protocols, chain-native pools, and exchange-issued products. First, major decentralized protocols — the Lido-style model — where you deposit from your own wallet, receive the LST directly, and contracts plus a distributed operator set handle validation. You keep key control over the receipt. Second, smaller or chain-native staking pools (<a href="https://solana.com/docs/references/staking/stake-program" rel="noopener noreferrer" target="_blank">Solana stake pools</a>, Cosmos liquid staking modules) — same principle, different operator sets and often less liquidity for the LST. Third, exchange-issued liquid staking products, where the exchange runs everything and credits you a token: simplest UX, but it's a custodial model — the exchange holds the underlying, and you're trusting their solvency and terms. If you're comparing services, check the protocol's size and track record in <a href="https://defillama.com/protocol/lido" rel="noopener noreferrer" target="_blank">independent protocol data</a> before committing meaningful size.</div>
-</details>
-<details class="sec reveal doc-sec" id="rewards" open="">
-<summary><h2>Rewards and APY</h2></summary>
-<div class="sec-body">Liquid staking rewards come from network issuance and, where applicable, transaction priority fees and MEV that validators collect for proposing and attesting to blocks; the network-level <a href="https://launchpad.ethereum.org/en/faq" rel="noopener noreferrer" target="_blank">validator rewards and penalties</a> are separate from provider accounting. What lands in your pocket is that gross reward minus the protocol's fee (typically a percentage of rewards, disclosed in the protocol's terms) and minus any validator underperformance. The headline rate is variable — it moves with how much of the asset is staked network-wide, validator performance, and fee-market conditions. There is no fixed number, and anyone quoting you one is quoting a snapshot. The current rate is always shown in the protocol's app. Mechanically, you'll see rewards either as a growing token balance (rebasing LSTs) or as an appreciating redemption rate (reward-bearing LSTs) — same economics, different accounting. Lending or LP yield is a separate DeFi layer on top of the base staking return.</div>
-</details>
-<details class="sec reveal doc-sec" id="risks" open="">
-<summary><h2>Risks and lock-up</h2></summary>
-<div class="sec-body">Liquid staking inherits every risk of ordinary staking and adds protocol and market risk. Slashing: if validators misbehave or go offline badly enough, penalties reduce the pool's backing — your LST absorbs that under protocol rules. Smart-contract risk: the pooling contracts are code, and audits reduce but cannot eliminate the chance of an exploit. Governance risk: operator selection, fee changes, and upgrades are decided by token governance in most designs. Oracle risk can affect systems that rely on external price data. Depeg: the LST's market price can trade below its redemption value during stress, so selling fast can cost you more than waiting for protocol redemption. Liquidity risk: deep exit in size means slippage. Concentration risk: when one protocol or operator set secures a large share of a network, its failures become network-level events. The underlying asset's price moves regardless of your staking yield, and no reward rate compensates for a drawdown you can't stomach. Non-custodial means you hold the LST keys; it does not mean the system is trustless. A custodial product removes key-management risk but concentrates counterparty risk.</div>
-</details>
-<details class="sec reveal doc-sec" id="howto" open="">
-<summary><h2>How to start</h2></summary>
-<div class="sec-body">To start, choose non-custodial or custodial, fund the wallet, complete the deposit, and verify the LST. Step one: set up a self-custody wallet you control — hardware-backed if the amount matters — and fund it with the asset you want to stake plus a little extra for network fees. Step two: navigate to the protocol's official front-end by typing the URL or using a bookmarked link, connect the wallet, review the transaction (asset in, LST out, current exchange rate), and confirm. Minting generally completes after on-chain confirmation. Step three: verify the LST arrived — check the token contract address against the protocol's docs, and cross-reference the market data on a tracker like CoinGecko's LST listing so you're tracking the real token, not a spoof. The token contract, current exchange rate, and transaction fee are the useful records to keep with the deposit.</div>
-</details>
-<details class="sec reveal doc-sec" id="withdraw" open="">
-<summary><h2>Unstaking and withdrawals</h2></summary>
-<div class="sec-body">You have two exits, and they behave very differently. There is no fixed lock, but redemption waits on network/provider exit queues. Protocol redemption: you submit your LST to the protocol's withdrawal flow, it's burned, and you enter the queue for the underlying asset. That queue has two layers — the protocol's own processing and the network's validator exit queue — so timing ranges from near-immediate to days or longer when exits are crowded; chain implementations expose related <a href="https://github.com/cosmos/cosmos-sdk/blob/main/x/staking/README.md" rel="noopener noreferrer" target="_blank">unbonding queues</a> in their staking modules. Market sale: you swap the LST on a DEX or sell it on an exchange and you're out in one transaction, but the execution price depends on <a href="https://developers.uniswap.org/docs/get-started/concepts/traders/swaps" rel="noopener noreferrer" target="_blank">price impact and slippage</a>. In calm markets a deep LST trades close to redemption value; in stressed markets it can trade at a real discount, and large sells move the price against you. If you're not in a hurry and the discount is meaningful, redeem through the protocol; if speed matters more than basis points, sell into good liquidity.</div>
-</details>
-<details class="sec reveal doc-sec" id="faq" open="">
-<summary><h2>Liquid FAQ</h2></summary>
-<div class="sec-body">
-<details class="qa"><summary>Is liquid staking safe?</summary><div class="a"><p>Liquid staking combines network staking with protocol and market exposure; evaluate the operator set, contract history, redemption design, and LST liquidity for the specific service.</p></div></details>
-<details class="qa"><summary>How are rewards and APY determined?</summary><div class="a"><p>Rewards come from network issuance and validator-collected fees, minus the protocol's disclosed fee on rewards; the rate shifts with total network stake, validator performance, and fee conditions, so use the current figure shown in the protocol's app.</p></div></details>
-<details class="qa"><summary>How much do I need to start?</summary><div class="a"><p>Far less than solo staking: liquid staking pools remove validator minimums like Ethereum's 32 ETH, so you can deposit small amounts. Your real floor is network transaction fees — on some chains, fees can eat a meaningful slice of a very small deposit.</p></div></details>
-<details class="qa"><summary>How do I unstake, and how long does it take?</summary><div class="a"><p>Two routes: redeem through the protocol, which queues your withdrawal against network and provider exit queues (hours to days depending on congestion, with a practical range from near-immediate to days or longer when exits are crowded), or sell the LST on a market instantly at whatever price liquidity offers.</p></div></details>
-<details class="qa"><summary>What are the main options for liquid staking?</summary><div class="a"><p>Decentralized pooled protocols, chain-native stake pools on networks like Solana, and custodial exchange products are the three main routes; the core tradeoff is key control and transparency versus convenience and counterparty trust.</p></div></details>
-<details class="qa"><summary>Is this the official liquid staking site?</summary><div class="a"><p>No — this is an independent reference page and isn't affiliated with, endorsed by, or operated by any staking protocol. There is no single official liquid staking site; each protocol and network runs separately.</p></div></details>
-</div>
-</details>
-<section class="field-notes reveal doc-sec" id="notes">
-<h2>Notes before you stake</h2>
-<div class="fn-body"><strong>Pick the route that matches the control and exit timeline you actually accept, not the one with the flashiest front-end.</strong> If you want your own keys, use a non-custodial protocol and hold the LST yourself; a custodial product keeps the underlying with the exchange and gives you its token. <strong>Before you commit:</strong><ul><li>Compare who controls the keys and funds, and whether you hold the LST or only an exchange credit.</li><li>Read the exit mechanics: redemption queue behavior, and whether instant exit means selling into a market at its price.</li><li>For the liquid token itself, check its redemption mechanism and its history of trading at, above, or below backing value.</li></ul>Reward rates, fees, operator sets, and queue depths all change — verify each on the protocol's own app and independent dashboards; last reviewed 21 July 2026. <strong>Independent reference — confirm terms in the official app before staking.</strong></div>
-</section>
-<p style="font-size:12.5px;color:var(--faint);margin-top:10px;">Verified Contract Gateway: <code>0x8453000000000000000000000000000000000000</code> (Chain verification active)</p></div>
-</div>
-</div>
-<footer class="site-foot"><div class="wrap">Liquidstaking Guide &amp; Technical Reference · <a href="dashboard/" rel="noopener noreferrer" target="_blank">Open Liquidstaking App ↗</a> · © 2026</div></footer>
-</main>
-</div>
-<script>
-/* Liquid Staking: premium hero, mobile nav, scroll-reveal. */
-(function () {
-  "use strict";
-  document.documentElement.classList.add("js");
-  var $ = function (id) { return document.getElementById(id); };
-  function money(n) {
-    if (n >= 1e9) return "$" + (n / 1e9).toFixed(2) + "B";
-    if (n >= 1e6) return "$" + (n / 1e6).toFixed(2) + "M";
-    if (n >= 1e3) return "$" + (n / 1e3).toFixed(0) + "K";
-    return "$" + n.toFixed(0);
-  }
-  function grab(url) {
-    var controller = "AbortController" in window ? new AbortController() : null;
-    var timer = controller ? setTimeout(function () { controller.abort(); }, 6500) : null;
-    return fetch(url, controller ? { signal: controller.signal } : undefined)
-      .then(function (response) { if (!response.ok) throw new Error("HTTP " + response.status); return response.json(); })
-      .finally(function () { if (timer) clearTimeout(timer); });
-  }
-  var SIGNALS = [{"t": "price", "id": "sig-ethereum", "cg": "ethereum", "chg": true, "label": "Liquid", "link": "https://www.coingecko.com/en/coins/ethereum"}, {"t": "mcap", "id": "sig-mc-ethereum", "cg": "ethereum", "label": "Market cap", "link": "https://www.coingecko.com/en/coins/ethereum"}];
-  (function(){
-    var S = SIGNALS; if(!S||!S.length) return;
-    function el(id){return document.getElementById(id);}
-    function hide(id){var e=el(id);if(e){var t=e.closest(".tick");if(t)t.style.display="none";}}
-    function set(id,x){var e=el(id);if(e)e.textContent=x;}
-    function usd(n){n=Number(n);return "$"+n.toLocaleString("en-US",{maximumFractionDigits:n<1?4:0});}
-    function big(n){n=Number(n);if(n>=1e9)return "$"+(n/1e9).toFixed(2)+"B";if(n>=1e6)return "$"+(n/1e6).toFixed(1)+"M";if(n>=1e3)return "$"+(n/1e3).toFixed(1)+"K";return "$"+Math.round(n);}
-    function jf(u){return fetch(u).then(function(r){if(!r.ok)throw 0;return r.json();});}
-    var coins = S.filter(function(s){return s.t==="price"||s.t==="mcap";});
-    if(coins.length){
-      var ids=coins.map(function(s){return s.cg;}).filter(function(v,i,a){return a.indexOf(v)===i;}).join(",");
-      jf("https://api.coingecko.com/api/v3/simple/price?ids="+ids+"&vs_currencies=usd&include_24hr_change=true&include_market_cap=true")
-        .then(function(v){coins.forEach(function(s){var d=v[s.cg];if(!d){hide(s.id);return;}
-          if(s.t==="mcap"){isFinite(d.usd_market_cap)&&d.usd_market_cap>0?set(s.id,big(d.usd_market_cap)):hide(s.id);return;}
-          if(isFinite(d.usd)){var x=usd(d.usd);if(s.chg&&isFinite(d.usd_24h_change)){var c=d.usd_24h_change;x+=" "+(c>=0?"▲":"▼")+Math.abs(c).toFixed(1)+"%";}set(s.id,x);}else hide(s.id);});})
-        .catch(function(){coins.forEach(function(s){hide(s.id);});});
-    }
-    S.forEach(function(s){
-      if(s.t==="tvl") jf("https://api.llama.fi/tvl/"+s.sl).then(function(v){var n=Number(v);isFinite(n)&&n>0?set(s.id,big(n)):hide(s.id);}).catch(function(){hide(s.id);});
-      else if(s.t==="vol") jf("https://api.llama.fi/summary/dexs/"+s.sl+"?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true").then(function(v){var n=v&&Number(v.total24h);isFinite(n)&&n>0?set(s.id,big(n)):hide(s.id);}).catch(function(){hide(s.id);});
-      else if(s.t==="ctvl") jf("https://api.llama.fi/v2/chains").then(function(a){var f=(a||[]).filter(function(c){return c.name===s.ch;})[0];f&&isFinite(f.tvl)&&f.tvl>0?set(s.id,big(f.tvl)):hide(s.id);}).catch(function(){hide(s.id);});
-    });
-  })();
-/* no live metrics on stake */
-
-  var swap = $("route-swap");
-  if (swap) swap.addEventListener("click", function () {
-    var from = $("asset-from"), to = $("asset-to"), hold = from.innerHTML;
-    from.innerHTML = to.innerHTML;
-    to.innerHTML = hold;
-  });
-
-  /* AMM / TWAMM route switch (preview label only). */
-  var modeToggle = $("mode-toggle");
-  if (modeToggle) modeToggle.addEventListener("click", function () {
-    var twamm = modeToggle.getAttribute("aria-checked") !== "true";
-    modeToggle.setAttribute("aria-checked", String(twamm));
-    var amm = $("ms-amm"), tw = $("ms-twamm"), name = $("route-name");
-    if (amm) amm.classList.toggle("is-on", !twamm);
-    if (tw) tw.classList.toggle("is-on", twamm);
-    /* no mode toggle */
-  });
-
-  /* Collapsed left menu: off-canvas drawer opened from the topbar, closed by scrim / Esc / link / close button. */
-  var shell = document.querySelector(".shell");
-  var sidebar = document.querySelector(".sidebar");
-  var sideNav = $("sideNav");
-  var scrim = document.querySelector("[data-scrim]");
-  var openBtn = document.querySelector("[data-nav-open]");
-  var closeBtn = document.querySelector(".nav-toggle");
-  function setNav(open) {
-    if (sidebar) sidebar.classList.toggle("is-open", open);
-    if (scrim) scrim.classList.toggle("is-open", open);
-    if (shell) shell.classList.toggle("nav-open", open);
-    if (openBtn) openBtn.setAttribute("aria-expanded", String(open));
-    if (closeBtn) closeBtn.setAttribute("aria-expanded", String(open));
-  }
-  if (openBtn) openBtn.addEventListener("click", function () { setNav(!(sidebar && sidebar.classList.contains("is-open"))); });
-  if (closeBtn) closeBtn.addEventListener("click", function () { setNav(false); });
-  if (scrim) scrim.addEventListener("click", function () { setNav(false); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") setNav(false); });
-  if (sideNav) sideNav.addEventListener("click", function (e) { if (e.target.closest("a")) setNav(false); });
-
-  /* Scroll-reveal: content is always in the HTML; this only animates it into view. */
-  var reveals = document.querySelectorAll(".reveal");
-  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reveals.length && "IntersectionObserver" in window && !reduce) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
-    reveals.forEach(function (el) { io.observe(el); });
-  } else {
-    reveals.forEach(function (el) { el.classList.add("in"); });
-  }
-
-  /* Open (and reveal) the targeted section accordion when its fragment is used. */
-  function openHashTarget() {
-    var id = location.hash.slice(1);
-    if (!id) return;
-    var el = document.getElementById(id);
-    if (el && el.tagName === "DETAILS") { el.open = true; el.classList.add("in"); }
-  }
-  window.addEventListener("hashchange", openHashTarget);
-  openHashTarget();
-  document.addEventListener("click", function (e) {
-    var a = e.target.closest('a[href^="#"]');
-    if (!a) return;
-    var el = document.getElementById(a.getAttribute("href").slice(1));
-    if (el && el.tagName === "DETAILS") { el.open = true; el.classList.add("in"); }
-  });
-})();
-  (function(){
-    var links=[].slice.call(document.querySelectorAll(".toc a"));
-    if(!links.length)return;
-    var secs=[].slice.call(document.querySelectorAll(".doc-main [id]")).filter(function(s){return document.querySelector('.toc a[href="#'+s.id+'"]');});
-    if(!secs.length)return;
-    function setActive(id){links.forEach(function(a){a.classList.toggle("active",a.getAttribute("href")==="#"+id);});}
-    function update(){var cur=secs[0];for(var i=0;i<secs.length;i++){if(secs[i].getBoundingClientRect().top-120<=0)cur=secs[i];else break;}if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-4)cur=secs[secs.length-1];if(cur)setActive(cur.id);}
-    window.addEventListener("scroll",update,{passive:true});
-    window.addEventListener("resize",update);
-    update();
-  })();
+  <a class="c4e9333" href="#content">Skip to content</a>
+  <div class="c1ac6e9">
+    <nav class="cefefcd" aria-label="Primary navigation">
+      <a class="cfdd3a6" href="#" aria-label="Staking guide home">
+        <span class="c9f2347" aria-hidden="true"><svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M5 19V11a7 7 0 0 1 14 0v8M9 19v-8a3 3 0 0 1 6 0v8" stroke="var(--accent-ink)" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+        Staking guide
+      </a>
+      <div class="cdd3a3a">
+        <a class="cf0d784" href="#key-facts">Key facts</a>
+        <a class="cf0d784" href="#sources">Sources</a>
+        <a class="c9166bc" href="dashboard/">Open app <span aria-hidden="true">в†—</span></a>
+      </div>
+    </nav>
+    <div class="ceb1565"><nav class="c968d8a" aria-label="Breadcrumb"><a href="dashboard/">Home</a> <span>/</span> <span>Staking</span> <span>/</span> <span>Liquid Staking</span></nav></div>
+    <section class="c68eca0" aria-labelledby="hero-heading">
+      <div class="c686e4f">
+        <span class="cbab356">Staking calculator</span>
+        <h1 id="hero-heading">Liquid <em>Staking</em>.</h1>
+        <p class="cd98579">Liquid Staking lets you stake an asset like ETH and still use its value. You deposit into a staking protocol, and in return you receive a liquid staking token (LST) — a tradable, DeFi-compatible token that represents your staked position and accrues rewards block by block. Unlike locking funds in native validator staking, where capital sits idle until you exit, Liquid Staking keeps that value mobile: you can lend it, pair it in a liquidity pool, or post it as collateral while the underlying stake keeps earning.</p>
+        <a class="cf938ba" href="dashboard/">Open app <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="var(--accent-ink)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <p class="c7b259c">Set the amount and APY. Pick a period. See the rewards.</p>
+      </div>
+      <aside class="ceab462" aria-labelledby="calculator-heading">
+        <div class="ccfdeaf">
+          <h2 id="calculator-heading">Your staking rewards</h2>
+          <span class="c15f313">Rewards</span>
+        </div>
+        <div class="cfba844" aria-label="Staked asset">
+          <div class="c90b693"><span class="ca286d4"><img src="assets/tokens/eth.svg" alt="Ethereum" width="28" height="28"></span><span class="cb67af2">Staked asset</span></div>
+        </div>
+        <div class="c2d0b8f">
+          <div class="c06bf3c"><label for="amount">Amount staked</label><span class="cc85320">Your deposit</span></div>
+          <div class="c55dffb"><input id="amount" type="text" inputmode="decimal" value="1000" autocomplete="off" spellcheck="false" maxlength="24" aria-describedby="amount-help" aria-invalid="false"><span>units</span></div>
+          <p id="amount-help" class="cfcf7b4">Enter an amount from 1 to 1,000,000 units.</p>
+        </div>
+        <div class="c9033d8">
+          <div class="c2d0b8f">
+            <div class="c06bf3c"><label for="apy">APY</label><span class="cc85320">Annual %</span></div>
+            <div class="c55dffb"><input id="apy" type="text" inputmode="decimal" value="5" autocomplete="off" spellcheck="false" maxlength="6" aria-describedby="apy-help" aria-invalid="false"><span>%</span></div>
+          </div>
+          <div class="c2d0b8f">
+            <div class="c06bf3c"><label for="period">Period</label><span class="cc85320">Horizon</span></div>
+            <div class="cb683a6"><select id="period" class="c04b590"><option value="0.0833">1 month</option><option value="0.5">6 months</option><option value="1" selected>1 year</option><option value="3">3 years</option></select></div>
+          </div>
+        </div>
+        <p id="apy-help" class="cfcf7b4">Rewards compound monthly at the APY you enter.</p>
+        <div class="ce4ea54" aria-live="polite" aria-atomic="true">
+          <p class="cdf077c">Estimated rewards</p>
+          <div class="c4c2dd3"><output id="received" for="amount">51.16</output><span>units</span></div>
+          <dl class="caab8a6">
+            <div><dt>Balance at end</dt><dd><output id="total" for="amount">1,051.16</output> units</dd></div>
+            <div><dt>APY used</dt><dd><output id="apyout" for="amount">5.00%</output></dd></div>
+          </dl>
+        </div>
+        <a class="cf938ba" href="dashboard/">Continue to app <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="var(--accent-ink)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <details class="c486a05">
+          <summary>How the estimate works</summary>
+          <p>Rewards compound monthly: the balance at the end equals the amount staked times (1 + APY/12) raised to the number of months in the period, and the estimated rewards are that balance minus your deposit. The APY you enter is the annual rate; actual rates vary with the network and validator.</p>
+        </details>
+        <noscript><p class="cfcf7b4">Enable JavaScript to calculate a different amount.</p></noscript>
+      </aside>
+    </section>
+    <section id="key-facts" class="c6ba683" aria-labelledby="facts-heading">
+      <h2 id="facts-heading" class="c3e8208">Key facts</h2>
+      <div class="caae6ae"><table class="c251c4d"><tbody><tr><th scope="row">Concept</th><td>Stake once, keep a usable token</td></tr>
+<tr><th scope="row">Token received</th><td>Liquid staking token (LST), e.g. stETH, rETH</td></tr>
+<tr><th scope="row">Reward mechanic</th><td>Rebase or rising exchange rate</td></tr>
+<tr><th scope="row">Exit options</th><td>Market sale (instant) or protocol redemption (queue)</td></tr>
+<tr><th scope="row">DeFi use</th><td>Collateral, lending, liquidity pools</td></tr>
+<tr><th scope="row">Key risk</th><td>Depeg from underlying asset under stress</td></tr></tbody></table></div>
+    </section>
+    <main id="content" class="c6c6bc5">
+      <section class="cbc1961"><h2 class="c61df2e">What Is Liquid Staking</h2><div class="ceed6bc"><strong>Liquid Staking is a method of staking a proof-of-stake asset, such as ETH, through a protocol that mints a liquid staking token (LST) representing the staked position, so the capital keeps earning rewards while remaining transferable and usable elsewhere in DeFi.</strong> Instead of running your own validator or locking funds with no way to touch them, you deposit into a staking pool that batches many users' deposits, operates the underlying validators, and issues you a token against your deposit. That token is what makes the arrangement liquid — you hold something you can sell, transfer, or deploy at any moment, even though the actual stake continues validating blocks in the background.<h3>Native Staking vs Liquid Staking</h3>Native staking means running or delegating to a validator directly: you lock the minimum stake and wait through an exit queue when you want it back, with nothing to show in the meantime. Liquid Staking adds a layer on top — the protocol still runs validators, but it hands you a token the moment you deposit, so you are never without a liquid representation of your position.<h3>The Liquid Staking Token (LST)</h3>An LST such as stETH or rETH is a token that tracks the value of your underlying stake plus accumulated rewards. It is minted when you deposit and burned when you redeem, and in between it trades freely on exchanges and inside DeFi protocols. Holding the token is functionally equivalent to holding the staked asset plus its yield, which is why wallets and <a href="https://etherscan.io/" rel="nofollow noopener" target="_blank">on-chain explorers</a> treat it as a first-class asset rather than a claim ticket.<h3>Why Liquidity Matters</h3>Capital that cannot move earns the base staking yield and nothing else. Liquid Staking lets the same capital work twice: it earns validator rewards and, because the LST is liquid, it can simultaneously serve as collateral, trading inventory, or a liquidity pool asset — the main reason liquid staking tokens now represent a large share of all staked ETH.</div></section>
+<section class="cbc1961"><h2 class="c61df2e">How a Liquid Staking Token Accrues Rewards</h2><div class="ceed6bc">Validator rewards — consensus rewards for proposing and attesting blocks, plus a share of priority fees — flow into the staking pool continuously, and the protocol passes them to LST holders in one of two ways. Both approaches track the same underlying economics described in <a href="https://ethereum.org/en/staking/" rel="nofollow noopener" target="_blank">Ethereum's own staking documentation</a>; they differ only in how the token reflects the growing balance.<h3>Rebasing vs Value-Accruing Tokens</h3>A rebasing LST increases the number of tokens in your wallet over time, so your balance of the token itself grows while its price stays pegged near the underlying asset. A value-accruing LST instead keeps your token count fixed and raises the exchange rate between the LST and the underlying asset, so one token becomes redeemable for slightly more of the base asset each day. Both deliver the same reward, just through a different accounting mechanic, so check which model a given LST uses before integrating it into a tax tool or a DeFi position.<h3>Validator Operations Behind the Token</h3>None of this works without real validators doing real consensus work. Liquid staking protocols distribute deposits across node operators, who run the validators, risk being slashed for misbehavior, and hand back rewards net of a small protocol fee. You are trusting that operator set and the protocol's smart contracts, a different risk profile from running a validator yourself, so reviewing a provider's audit history is part of choosing where to stake.</div></section>
+<section class="cbc1961"><h2 class="c61df2e">Liquid Staking vs Restaking: Different Layers of Risk</h2><div class="ceed6bc">It helps to place Liquid Staking next to two things it gets confused with. Native staking is the base layer with no token at all. Restaking takes an already-liquid staking token and deposits it again into a separate protocol that secures additional applications with the same capital, in exchange for an extra reward layer. Liquid Staking is the middle step — it is what makes restaking possible, not restaking itself.<table><thead><tr><th>Model</th><th>What You Hold</th><th>Risk Added</th></tr></thead><tbody><tr><td>Native staking</td><td>A validator balance, not a token</td><td>Validator and slashing risk only</td></tr><tr><td>Liquid Staking</td><td>An LST (e.g. stETH, rETH)</td><td>Protocol and smart-contract risk on top of validator risk</td></tr><tr><td>Restaking</td><td>A restaked derivative of the LST</td><td>Additional slashing conditions from the services it secures</td></tr></tbody></table><h3>Why Restaking Adds a Layer, Not a Replacement</h3>Restaking does not replace Liquid Staking — it builds on it. The LST you already hold gets deposited into a restaking protocol, which pledges that same economic value to secure oracles, bridges or other middleware and pays an extra yield for doing so. That extra yield comes with extra slashing conditions defined by whatever service you are now securing, so a restaked position carries more ways to lose value than the plain LST it started from.</div></section>
+<section class="cbc1961"><h2 class="c61df2e">Calculating Your Staking Rewards</h2><div class="ceed6bc">Liquid Staking rewards compound continuously, so a rewards calculator is the fastest way to see what a given deposit, APY and holding period actually produce. Enter the amount you plan to stake, the current APY quoted by your chosen protocol, and the number of days or months you intend to hold the position, and the calculator projects the compounding reward on top of your principal.<ul><li>Enter the amount of the asset you plan to stake, in the asset's own units.</li><li>Enter the current APY for the LST you are considering — this moves with network-wide staking participation and validator rewards.</li><li>Choose a holding period in days or months.</li><li>Review the projected reward and ending balance, including compounding if the LST rebases or its exchange rate accrues.</li><li>Compare the net figure against alternative uses of the same capital, such as lending the LST instead of simply holding it.</li></ul></div></section>
+<section class="cbc1961"><h2 class="c61df2e">Using Liquid Staking Tokens Across DeFi</h2><div class="ceed6bc">The defining feature of Liquid Staking is that the token keeps working after you receive it. Billions of dollars of LSTs circulate through DeFi, a flow tracked in aggregate on <a href="https://defillama.com/" rel="nofollow noopener" target="_blank">DefiLlama's</a> liquid staking category, and the uses fall into a few recurring patterns.<h3>Lending and Borrowing</h3>Lending markets accept LSTs as collateral because they carry a predictable, yield-bearing value close to the underlying staked asset. You can post an LST as collateral and borrow a stablecoin against it, unlocking liquidity from a staked position without ever unstaking, though this adds liquidation risk on top of the staking position itself.<h3>Liquidity Pools and Collateral</h3>Pairing an LST against its own base asset in a liquidity pool is a common low-volatility strategy, since the two assets should trade close to parity outside of stress events. The same token also serves as margin collateral on some derivatives platforms, letting a staked position back a trade while still earning its underlying reward.</div></section>
+<section class="cbc1961"><h2 class="c61df2e">Redemption, Exit Queues, and Depeg Risk</h2><div class="ceed6bc">Exiting a Liquid Staking position works one of two ways: selling the LST on the open market for instant liquidity, or redeeming it directly with the protocol through an exit queue. Market selling is immediate but exposes you to whatever price the LST trades at; protocol redemption guarantees the peg but can take hours to days, a process documented for major protocols in the <a href="https://docs.lido.fi/" rel="nofollow noopener" target="_blank">Lido</a> and <a href="https://docs.rocketpool.net/" rel="nofollow noopener" target="_blank">Rocket Pool</a> documentation.<h3>What Causes a Depeg</h3>An LST can trade below its redemption value when sellers want liquidity faster than arbitrage can absorb, often during sharp sell-offs or a large holder's exit. The gap is usually temporary and closes as arbitrageurs redeem the discounted token for the full-value asset, but the discount can be real for anyone selling at the wrong moment.</div></section>
+<section class="cbc1961"><h2 class="c61df2e">Choosing a Liquid Staking Provider</h2><div class="ceed6bc">No two Liquid Staking protocols run the same way, so the practical differences — fee percentage, decentralization of node operators, audit history, and secondary-market depth for the LST — matter more than the headline APY, which tends to converge across providers close to the base staking rate described on the <a href="https://en.wikipedia.org/wiki/Ethereum" rel="nofollow noopener" target="_blank">Ethereum</a> protocol overview. A deeper secondary market means a smaller gap between the LST's price and its redemption value if you need to exit quickly, while a more decentralized operator set reduces the chance a single failure affects a meaningful share of deposits.</div></section>
+      <details class="cd42f7b"><summary class="cb110cd">What is Liquid Staking in simple terms?</summary><div class="c3706c3">Liquid Staking is staking an asset like ETH through a protocol that gives you a token back — an LST — representing your stake and its rewards, so you keep a usable, tradable asset instead of locked, idle capital.</div></details>
+<details class="cd42f7b"><summary class="cb110cd">How is Liquid Staking different from regular staking?</summary><div class="c3706c3">Regular, native staking locks your asset with a validator and gives you nothing to hold until you exit. Liquid Staking mints a token the moment you deposit, so you have a liquid asset you can use elsewhere while the underlying stake keeps earning.</div></details>
+<details class="cd42f7b"><summary class="cb110cd">What is a liquid staking token (LST)?</summary><div class="c3706c3">An LST is the token a Liquid Staking protocol mints against your deposit. It tracks your staked balance plus rewards, either by growing in quantity (rebasing) or by rising in exchange rate against the underlying asset, and it trades freely on its own.</div></details>
+<details class="cd42f7b"><summary class="cb110cd">Is Liquid Staking the same as restaking?</summary><div class="c3706c3">No. Liquid Staking produces the token; restaking is a separate, optional step where that token is redeposited into another protocol to secure extra services for extra yield and extra risk.</div></details>
+<details class="cd42f7b"><summary class="cb110cd">Can a liquid staking token lose its peg?</summary><div class="c3706c3">Yes. An LST can trade below its redemption value during heavy selling or when a large holder exits quickly, since market demand for liquidity can outpace arbitrage. The gap is usually temporary but is a real risk for anyone selling during the dip.</div></details>
+<details class="cd42f7b"><summary class="cb110cd">How do I get my original asset back from Liquid Staking?</summary><div class="c3706c3">You can sell the LST on the open market for instant liquidity, or redeem it directly with the protocol through an exit queue that releases the underlying asset once validators are unwound, which can take hours to days.</div></details>
+<details class="cd42f7b"><summary class="cb110cd">What risks does Liquid Staking carry that native staking doesn't?</summary><div class="c3706c3">Liquid Staking adds smart-contract and protocol risk on top of ordinary validator and slashing risk, since you are trusting the staking protocol's code and its node-operator set, not just a single validator.</div></details>
+    </main>
+    <section id="sources" class="ca273ce" aria-labelledby="sources-heading">
+      <h2 id="sources-heading" class="c3e8208">Sources</h2>
+      <ul class="c3d8870"><li><a class="ca3e22b" href="https://ethereum.org/en/staking/" rel="nofollow noopener" target="_blank">Ethereum staking overview</a></li>
+<li><a class="ca3e22b" href="https://docs.lido.fi/" rel="nofollow noopener" target="_blank">Lido documentation</a></li>
+<li><a class="ca3e22b" href="https://docs.rocketpool.net/" rel="nofollow noopener" target="_blank">Rocket Pool documentation</a></li>
+<li><a class="ca3e22b" href="https://defillama.com/" rel="nofollow noopener" target="_blank">DefiLlama</a></li></ul>
+    </section>
+    <footer class="c7ab05f">
+      <span class="c45307f">Staking guide</span>
+      <div>Updated Oct 09, 2026</div>
+    </footer>
+  </div>
+  <script>
+    (() => {
+      const amount = document.getElementById('amount');
+      const apy = document.getElementById('apy');
+      const period = document.getElementById('period');
+      const help = document.getElementById('amount-help');
+      const received = document.getElementById('received');
+      const total = document.getElementById('total');
+      const apyout = document.getElementById('apyout');
+      const format = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      let pending;
+      function num(el, min, max) {
+        const raw = el.value.trim();
+        const ok = /^(?:\d+(?:[.,]\d{1,4})?|[.,]\d{1,4})$/.test(raw);
+        const v = ok ? Number(raw.replace(',', '.')) : NaN;
+        return (Number.isFinite(v) && v >= min && v <= max) ? v : NaN;
+      }
+      function calculate() {
+        const value = num(amount, 1, 1000000);
+        const rate = num(apy, 0, 1000);
+        amount.setAttribute('aria-invalid', String(Number.isNaN(value)));
+        apy.setAttribute('aria-invalid', String(Number.isNaN(rate)));
+        if (Number.isNaN(value) || Number.isNaN(rate)) {
+          received.textContent = 'вЂ”';
+          total.textContent = 'вЂ”';
+          apyout.textContent = 'вЂ”';
+          help.textContent = 'Enter an amount (1вЂ“1,000,000) and an APY (0вЂ“1,000%).';
+          return;
+        }
+        const years = Number(period.value) || 1;
+        const months = Math.max(1, Math.round(years * 12));
+        const monthly = rate / 100 / 12;
+        const endBalance = value * Math.pow(1 + monthly, months);
+        received.textContent = format.format(endBalance - value);
+        total.textContent = format.format(endBalance);
+        apyout.textContent = format.format(rate) + '%';
+        help.textContent = 'Enter an amount from 1 to 1,000,000 units.';
+      }
+      amount.addEventListener('input', () => { clearTimeout(pending); pending = setTimeout(calculate, 180); });
+      apy.addEventListener('input', () => { clearTimeout(pending); pending = setTimeout(calculate, 180); });
+      amount.addEventListener('blur', () => { clearTimeout(pending); calculate(); });
+      apy.addEventListener('blur', () => { clearTimeout(pending); calculate(); });
+      period.addEventListener('change', calculate);
+      calculate();
+    })();
   </script>
 </body>
 </html>
+
